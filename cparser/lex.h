@@ -13,7 +13,7 @@ namespace lex
 
 
 
-	bool  init_lex();
+	bool  init_lex(std::string& strfilename);
 	bool  error_report();
 	int pre_get_token_val(std::string& strVal);
 	int pre_get_token();

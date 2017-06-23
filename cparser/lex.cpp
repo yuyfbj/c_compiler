@@ -132,9 +132,9 @@ namespace lex
 
 	CLex g_Lex;
 
-	std::string strfilename = "c:\\1.o";
+	//std::string strfilename = "c:\\1.o";
 
-	bool  init_lex()
+	bool  init_lex(std::string& strfilename)
 	{
 		bool bRet = g_Lex.readfile(strfilename);
 		/*	while (true)

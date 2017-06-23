@@ -53,6 +53,14 @@ bool gen_json(std::string& json_out)
 	Json::FastWriter jsFastWriter;
 	json_out = jsFastWriter.write(json);
 	
+
+	std::ofstream of("tree.json");
+	if (of.is_open())
+	{
+		of << json_out;
+		of.flush();
+		of.close();
+	}
 	return true;
 }
 
@@ -62,7 +70,14 @@ int _tmain(int argc, _TCHAR* argv[])
 {
 	std::cout << "hello" << std::endl;
 
-	lex::init_lex();
+	std::string file_name_in;
+	
+	if (argc >= 2)
+	{
+		file_name_in = argv[1];
+	}
+
+	lex::init_lex(file_name_in);
 	
 	main_parse();
 
