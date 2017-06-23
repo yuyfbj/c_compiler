@@ -17,7 +17,7 @@ int yywrap(void)        /* called at end of input */
 
 int _tmain(int argc, _TCHAR* argv[])
 {	
-	std::ofstream of("c:\\1.o");
+	std::ofstream of("1.o");
 	while (true)
 	{
 		int nRet = yuyf_main();
