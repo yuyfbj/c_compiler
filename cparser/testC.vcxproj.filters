@@ -19,11 +19,23 @@
     <Filter Include="JSON">
       <UniqueIdentifier>{e1fee54e-4a38-4d59-9e1d-796f4156b469}</UniqueIdentifier>
     </Filter>
-    <Filter Include="expr">
-      <UniqueIdentifier>{49215b1a-2d50-4c44-b36d-c9f278a71f5d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="parserT">
       <UniqueIdentifier>{aec20025-97c5-4c3b-9a62-99378b5c8e47}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="parser">
+      <UniqueIdentifier>{49215b1a-2d50-4c44-b36d-c9f278a71f5d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lex">
+      <UniqueIdentifier>{7cda37fe-b019-48e9-b36a-c3e62364d106}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="def">
+      <UniqueIdentifier>{260f21aa-079d-4616-a87f-a3a95361f5f3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="interpret">
+      <UniqueIdentifier>{c85dec78-8cd8-46b0-ba92-a46de539e7b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="symbol">
+      <UniqueIdentifier>{3e8fbda8-0944-485c-867c-775dcabb2083}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -40,31 +52,40 @@
       <Filter>JSON</Filter>
     </ClInclude>
     <ClInclude Include="parser_expression.h">
-      <Filter>expr</Filter>
-    </ClInclude>
-    <ClInclude Include="public_func.h">
-      <Filter>expr</Filter>
-    </ClInclude>
-    <ClInclude Include="token_def.h">
-      <Filter>expr</Filter>
+      <Filter>parser</Filter>
     </ClInclude>
     <ClInclude Include="rule.h">
       <Filter>parserT</Filter>
     </ClInclude>
-    <ClInclude Include="lex.h">
-      <Filter>expr</Filter>
-    </ClInclude>
-    <ClInclude Include="node.h">
-      <Filter>expr</Filter>
-    </ClInclude>
     <ClInclude Include="parser_declare.h">
-      <Filter>expr</Filter>
+      <Filter>parser</Filter>
     </ClInclude>
     <ClInclude Include="parser_statement.h">
-      <Filter>expr</Filter>
+      <Filter>parser</Filter>
+    </ClInclude>
+    <ClInclude Include="lex.h">
+      <Filter>lex</Filter>
+    </ClInclude>
+    <ClInclude Include="node.h">
+      <Filter>def</Filter>
+    </ClInclude>
+    <ClInclude Include="token_def.h">
+      <Filter>def</Filter>
+    </ClInclude>
+    <ClInclude Include="public_func.h">
+      <Filter>def</Filter>
+    </ClInclude>
+    <ClInclude Include="interpret.h">
+      <Filter>interpret</Filter>
     </ClInclude>
     <ClInclude Include="gen.h">
-      <Filter>expr</Filter>
+      <Filter>interpret</Filter>
+    </ClInclude>
+    <ClInclude Include="symbol_item.h">
+      <Filter>symbol</Filter>
+    </ClInclude>
+    <ClInclude Include="symbol_table.h">
+      <Filter>symbol</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -75,16 +96,22 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="parser_expression.cpp">
-      <Filter>expr</Filter>
-    </ClCompile>
-    <ClCompile Include="lex.cpp">
-      <Filter>expr</Filter>
+      <Filter>parser</Filter>
     </ClCompile>
     <ClCompile Include="parser_declare.cpp">
-      <Filter>expr</Filter>
+      <Filter>parser</Filter>
     </ClCompile>
     <ClCompile Include="parser_statement.cpp">
-      <Filter>expr</Filter>
+      <Filter>parser</Filter>
+    </ClCompile>
+    <ClCompile Include="lex.cpp">
+      <Filter>lex</Filter>
+    </ClCompile>
+    <ClCompile Include="interpret.cpp">
+      <Filter>interpret</Filter>
+    </ClCompile>
+    <ClCompile Include="symbol_table.cpp">
+      <Filter>symbol</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -10,7 +10,7 @@ namespace gen
 		template <class TP>
 		void gen_json(Json::Value& json, TP* item)
 		{
-			json["type"] = item->type;
+			json["atype"] = item->type;
 			json["op"] = item->op;
 			json["right"] = item->right;
 		}
@@ -18,7 +18,7 @@ namespace gen
 		template <class TP, class TR1>
 		void gen_json(Json::Value& json, TP* item)
 		{
-			json["type"] = item->type;
+			json["atype"] = item->type;
 			json["op"] = item->op;
 			json["right"] = item->right;
 
@@ -36,7 +36,7 @@ namespace gen
 		>
 		void gen_json(Json::Value& json,TP* item)
 		{
-			json["type"] = item->type;
+			json["atype"] = item->type;
 			json["op"] = item->op;
 			json["right"] = item->right;
 
@@ -60,7 +60,7 @@ namespace gen
 			, class TR3>
 		void gen_json(Json::Value& json,TP* item)
 		{
-			json["type"] = item->type;
+			json["atype"] = item->type;
 			json["op"] = item->op;
 			json["right"] = item->right;
 
@@ -93,7 +93,7 @@ namespace gen
 		>
 		void gen_json(Json::Value& json,TP* item)
 		{
-			json["type"] = item->type;
+			json["atype"] = item->type;
 			json["op"] = item->op;
 			json["right"] = item->right;
 
@@ -132,7 +132,7 @@ namespace gen
 		>
 		void gen_json(Json::Value& json,TP* item)
 		{
-			json["type"] = item->type;
+			json["atype"] = item->type;
 			json["op"] = item->op;
 			json["right"] = item->right;
 
@@ -178,7 +178,7 @@ namespace gen
 		>
 		void gen_json(Json::Value& json,TP* item)
 		{
-			json["type"] = item->type;
+			json["atype"] = item->type;
 			json["op"] = item->op;
 			json["right"] = item->right;
 
@@ -231,7 +231,7 @@ namespace gen
 		>
 			void gen_json(Json::Value& json,TP* item)
 			{
-				json["type"] = item->type;
+				json["atype"] = item->type;
 				json["op"] = item->op;
 				json["right"] = item->right;
 
@@ -279,7 +279,8 @@ namespace gen
 				}
 			}
 		
-	
+		//-------------------------------------------------------------
+		
 	
 
 	

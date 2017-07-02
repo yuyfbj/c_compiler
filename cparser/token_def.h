@@ -84,6 +84,14 @@
 #define ENUMERATION_CONSTANT 322
 
 
+#define LABEL 330
+#define DECLARE  331
+
+//以下为各个语义分析所要用的符号。
+#define ASSIGNMENT_OP  350
+#define TYPE_VEC_ASSIGNMENT 351
+
+
 
 
 

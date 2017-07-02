@@ -37,7 +37,7 @@ namespace stmt
 	item_translation_unit* translation_unit();
 
 	
-	bool main_parse();
+	
 
 }
 
