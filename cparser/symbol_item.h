@@ -42,6 +42,9 @@ namespace symbol
 	using null_type = _op<0>;
 
 	
+
+	//这个结构将成为变体的容器，一切符号计算都在这个变体里操作。
+	//
 	struct ret_item
 	{
 		int op = 0;
@@ -119,7 +122,7 @@ namespace symbol
 	//标号
 	struct label_t :public item
 	{
-		const int type = LABEL;
+		int type = LABEL;
 		std::string name;
 		std::string val;
 		virtual int get_type()
@@ -127,32 +130,86 @@ namespace symbol
 			return type;
 		}
 	};
-	//常量
-	template<int ntype>
-	struct const_t:public item
-	{
-		const int type = ntype;
-		std::string name;
-		std::string val;
-		virtual int get_type()
-		{
-			return type;
-		}
-	};
-
+	
 	//变量
-	template<class T>
 	struct var_t:public item
 	{
-		const int type = IDENTIFIER;
-		using var_type = T;
-		std::string name;
-		std::string val;
+		int type = IDENTIFIER;
 		virtual int get_type()
 		{
 			return type;
 		}
+
+		enum vt{
+			vt_void_ptr = 100
+			,vt_char_ptr
+			,vt_short_ptr
+			,vt_int_ptr
+			,vt_long_ptr
+			,vt_float_ptr
+			,vt_double_ptr
+			,vt_struct_ptr
+			,vt_enum_ptr
+		};
+		int var_type = 0;
+		int size = 0;
+		std::string name;
+		
+		union
+		{
+			void*	void_ptr = NULL;
+			char*	char_ptr;
+			short*	short_ptr;
+			int*	int_ptr;
+			long*	long_ptr;
+			float*  float_ptr;
+			double* double_ptr;
+			void*   struct_ptr;
+			void*   enum_ptr;
+		};
 	};
+
+	//常量
+
+	struct const_t :public var_t
+	{
+		const_t(float f,const char* val)
+		{
+			name = val;
+			float fval = atof(val);
+			type = CONST;
+			var_type = vt_float_ptr;
+			size = sizeof(float);
+			float_ptr = new float(fval);
+			
+		}
+		const_t(int i,const char* val)
+		{
+			name = val;
+			int ival = atoi(val);
+			type = CONST;
+			var_type = vt_int_ptr;
+			size = sizeof(int);
+			int_ptr = new int(ival);
+			
+		}
+
+		const_t(const char* pstr)
+		{
+			name = pstr;
+			type = CONST;
+			var_type = vt_char_ptr;
+			size = strlen(pstr) + 1;
+			char_ptr = new char[size];
+			if (char_ptr)
+			{
+				strcpy(char_ptr, pstr);
+			}
+		}
+
+		
+	};
+
 
 
 	//结构体,枚举 联合

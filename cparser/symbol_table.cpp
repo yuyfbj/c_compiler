@@ -36,46 +36,95 @@ namespace symbol
 		return true;
 	}
 
-
-	CSymbolTable* g_cur_symbol_table = NULL;
-
-	bool init_symbol_table()
+	CSymbolTable g_var_table;
+	bool insert_var(const std::string& name, item* node)
 	{
-		if (NULL == g_cur_symbol_table)
-			g_cur_symbol_table = new CSymbolTable;
-		if (g_cur_symbol_table)
-			return true;
-		return false;
+		return g_var_table.insert_item(name, node);
+	}
+	item* find_var(const std::string& name)
+	{
+		return g_var_table.find_item(name);
+	}
+	bool erase_var(const std::string& name)
+	{
+		return g_var_table.erase_item(name);
 	}
 
-	bool insert_item(const std::string& name, item* node)
+	CSymbolTable g_const_table;
+	bool insert_const(const std::string& name, item* node)
 	{
-		if (g_cur_symbol_table)
-		{
-			return g_cur_symbol_table->insert_item(name, node);
-		}
-		return false;
+		return g_const_table.insert_item(name, node);
 	}
-	item* find_item(const std::string& name)
+	item* find_const(const std::string& name)
 	{
-		if (g_cur_symbol_table)
-		{
-			return g_cur_symbol_table->find_item(name);
-		}
-		return false;
+		return g_const_table.find_item(name);
 	}
-
-	bool erase_item(const std::string& name)
+	bool erase_const(const std::string& name)
 	{
-		if (g_cur_symbol_table)
-		{
-			return g_cur_symbol_table->erase_item(name);
-		}
-		return false;
+		return g_const_table.erase_item(name);
 	}
 
 
+	CSymbolTable g_string_table;
+	bool insert_string(const std::string& name, item* node)
+	{
+		return g_string_table.insert_item(name, node);
+	}
+	item* find_string(const std::string& name)
+	{
+		return g_string_table.find_item(name);
+	}
+	bool erase_string(const std::string& name)
+	{
+		return g_string_table.erase_item(name);
+	}
 
 
+	CSymbolTable g_decl_table;
+	bool insert_decl(const std::string& name, item* node)
+	{
+		return g_decl_table.insert_item(name, node);
+	}
+	item* find_decl(const std::string& name)
+	{
+		return g_decl_table.find_item(name);
+	}
+	bool erase_decl(const std::string& name)
+	{
+		return g_decl_table.erase_item(name);
+	}
+
+
+	CSymbolTable g_label_table;
+	bool insert_label(const std::string& name, item* node)
+	{
+		return g_label_table.insert_item(name, node);
+	}
+	item* find_lable(const std::string& name)
+	{
+		return g_label_table.find_item(name);
+	}
+	bool erase_label(const std::string& name)
+	{
+		return g_label_table.erase_item(name);
+	}
+
+	CSymbolTable g_extern_table;
+	bool insert_extern(const std::string& name, item* node)
+	{
+		return g_extern_table.insert_item(name, node);
+	}
+	item* find_extern(const std::string& name)
+	{
+		return g_extern_table.find_item(name);
+	}
+	bool erase_extern(const std::string& name)
+	{
+		return g_extern_table.erase_item(name);
+	}
+
+
+
+	
 
 }

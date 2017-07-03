@@ -47,13 +47,35 @@ namespace symbol
 
 
 	};
-	extern CSymbolTable* g_cur_symbol_table;
+	extern CSymbolTable g_var_table;
+	bool insert_var(const std::string& name, item* node);
+	item* find_var(const std::string& name);
+	bool erase_var(const std::string& name);
 
+	extern CSymbolTable g_const_table;
+	bool insert_const(const std::string& name, item* node);
+	item* find_const(const std::string& name);
+	bool erase_const(const std::string& name);
 
-	bool insert_item(const std::string& name, item* node);
-	item* find_item(const std::string& name);
-	bool erase_item(const std::string& name);
+	extern CSymbolTable g_string_table;
+	bool insert_string(const std::string& name, item* node);
+	item* find_string(const std::string& name);
+	bool erase_string(const std::string& name);
 
+	extern CSymbolTable g_decl_table;
+	bool insert_decl(const std::string& name, item* node);
+	item* find_decl(const std::string& name);
+	bool erase_decl(const std::string& name);
+
+	extern CSymbolTable g_label_table;
+	bool insert_label(const std::string& name, item* node);
+	item* find_lable(const std::string& name);
+	bool erase_label(const std::string& name);
+
+	extern CSymbolTable g_extern_table;
+	bool insert_extern(const std::string& name, item* node);
+	item* find_extern(const std::string& name);
+	bool erase_extern(const std::string& name);
 
 }
 #endif

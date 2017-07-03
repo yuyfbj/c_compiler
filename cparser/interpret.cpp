@@ -1,16 +1,112 @@
 #include "interpret.h"
 namespace interpret
 {
+	int evaluate(item_logical_and_expression* item, ret_item& ret)
+	{
 
 
+		return 0;
+	}
+	int evaluate(item_logical_or_expression_ex* item, ret_item& ret)
+	{
+		/*
+		logical_or_expression_ex
+		: OR_OP logical_and_expression logical_or_expression_ex
+		|EMPTY
+		*/
+
+		if (item->right1 && item->right2 == NULL)
+		{
+			return evaluate(item->right1, ret);
+		}
+		else if (item->right1 && item->right2)
+		{
+			ret_item ret_and_item;
+			evaluate(item->right1, ret_and_item);
+			ret_item ret_orex_item;
+			evaluate(item->right2, ret_orex_item);
+
+			auto fn = [](ret_item& v1, ret_item& v2, ret_item& ret)->int
+			{
+				auto bool_ptr1 = v1.get_item<bool>();
+				auto bool_ptr2 = v2.get_item<bool>();
+				auto bool_ptr_result = new bool((*bool_ptr1) || (*bool_ptr2));
+				ret.set_item<bool>(bool_ptr_result);
+
+				return 0;
+			};
+			return fn(ret_and_item, ret_orex_item, ret);
+
+		}
+
+		return 0;
+	}
+	int evaluate(item_logical_or_expression* item, ret_item& ret)
+	{//ret里要放入一个bool值
+		//logical_or_expression
+		//	: logical_and_expression
+		//	| logical_or_expression OR_OP logical_and_expression
+		//	;
+		/*
+		logical_or_expression
+		: logical_and_expression  logical_or_expression_ex
+		;
+		logical_or_expression_ex
+		: OR_OP logical_and_expression logical_or_expression_ex
+		|EMPTY
+		;
+		*/
+		if (item->right1 && item->right2 == NULL)
+		{
+			return evaluate(item->right1, ret);
+		}
+		if (item->right1 && item->right2)
+		{
+			ret_item ret_and_item;
+			evaluate(item->right1, ret_and_item);
+			ret_item ret_orex_item;
+			evaluate(item->right2, ret_orex_item);
+			auto fn = [](ret_item& v1,ret_item& v2,ret_item& ret)->int
+			{
+				auto bool_ptr1 = v1.get_item<bool>();
+				auto bool_ptr2 = v2.get_item<bool>();
+				auto bool_ptr_result = new bool((*bool_ptr1) || (*bool_ptr2));
+				ret.set_item<bool>(bool_ptr_result);
+
+				return 0;
+			};
+			return fn( ret_and_item, ret_orex_item, ret);
+		}
+
+		return 0;
+	}
 	int evaluate(item_conditional_expression* item, ret_item& ret)
 	{
 		//conditional_expression
 		//	: logical_or_expression
 		//	| logical_or_expression '?' expression ':' conditional_expression
+		if (item->right1 && item->right2 == NULL && item->right3 == NULL)
+		{
+			return evaluate(item->right1,ret);
+		}
+		if (item->right1 &&item->right2 && item->right3)
+		{
+			ret_item ret_condition_item;
+			evaluate(item->right1, ret_condition_item);
 
+			auto result_bool_ptr = ret_condition_item.get_item<bool>();
+			if (*result_bool_ptr)
+			{
+				ret_item ret_result1_item;
+				return evaluate(item->right2, ret_result1_item);
+			}
+			else
+			{
+				ret_item ret_result2_item;
+				evaluate(item->right3, ret_result2_item);
+			}
 
-
+		}
 
 		return 0;
 	}
@@ -57,12 +153,12 @@ namespace interpret
 			ret_item ret_cast_item;
 			evaluate(item->right3, ret_cast_item);
 
-			auto fn = [](ret_item& v1,ret_item& v2)->int
+			auto fn = [](ret_item& v1,ret_item& v2,ret_item& ret)->int
 			{//==============================================
 
 			};
 
-			return fn(ret_type_name,ret_cast_item);
+			return fn(ret_type_name,ret_cast_item,ret);
 		}
 
 		return 0;
@@ -176,13 +272,13 @@ namespace interpret
 			ret_item ret_dad_item;
 			evaluate(item->right2, ret_dad_item);
 
-			auto fn = [](ret_item& v1,ret_item&v2)->int
+			auto fn = [](ret_item& v1,ret_item&v2,ret_item& ret)->int
 			{//========================================
 
 
 				return 0;
 			};
-			return fn(ret_pt, ret_dad_item);
+			return fn(ret_pt, ret_dad_item,ret);
 
 		}
 
@@ -209,12 +305,12 @@ namespace interpret
 			ret_item ret_ad_item;
 			evaluate(item->right3, ret_ad_item);
 
-			auto fn = [](ret_item& v1,ret_item& v2)->int
+			auto fn = [](ret_item& v1, ret_item& v2, ret_item& ret)->int
 			{//=================================
 
 				return 0;
 			};
-			return fn(ret_sql_item,ret_ad_item);
+			return fn(ret_sql_item,ret_ad_item,ret);
 		}
 
 		return 0;
@@ -235,23 +331,23 @@ namespace interpret
 		{
 			ret_item ret_unary_item;
 			evaluate(item->right2, ret_unary_item);
-			auto fn = [](ret_item& v1)->int
+			auto fn = [](ret_item& v1,ret_item& ret)->int
 			{//=================================
 
 
 			};
-			return fn(ret_unary_item);
+			return fn(ret_unary_item,ret);
 		}
 		else if (item->op == DEC_OP)
 		{
 			ret_item ret_unary_item;
 			evaluate(item->right2, ret_unary_item);
-			auto fn = [](ret_item& v1)->int
+			auto fn = [](ret_item& v1,ret_item& ret)->int
 			{//=================================
 
 
 			};
-			return fn(ret_unary_item);
+			return fn(ret_unary_item,ret);
 		}
 		else if (item->op == SIZEOF)
 		{
@@ -259,84 +355,84 @@ namespace interpret
 			{
 				ret_item ret_unary_item;
 				evaluate(item->right2, ret_unary_item);
-				auto fn = [](ret_item& v1)->int
+				auto fn = [](ret_item& v1,ret_item& ret)->int
 				{//=================================
 
 
 				};
-				return fn(ret_unary_item);
+				return fn(ret_unary_item,ret);
 			}
 			else if (item->right4)
 			{
 				ret_item ret_type_name_item;
 				evaluate(item->right4, ret_type_name_item);
-				auto fn = [](ret_item& v1)->int
+				auto fn = [](ret_item& v1,ret_item& ret)->int
 				{//=================================
 
 
 				};
-				return fn(ret_type_name_item);
+				return fn(ret_type_name_item,ret);
 			}
 		}
 		else if (item->op == '&')
 		{
 			ret_item ret_cast_item;
 			evaluate(item->right4, ret_cast_item);
-			auto fn = [](ret_item& v1)->int
+			auto fn = [](ret_item& v1,ret_item& ret)->int
 			{//========================================
 
 			};
-			return fn(ret_cast_item);
+			return fn(ret_cast_item,ret);
 		}
 		else if (item->op == '*')
 		{
 			ret_item ret_cast_item;
 			evaluate(item->right4, ret_cast_item);
-			auto fn = [](ret_item& v1)->int
+			auto fn = [](ret_item& v1, ret_item& ret)->int
 			{//========================================
 
 			};
-			return fn(ret_cast_item);
+			return fn(ret_cast_item,ret);
 		}
 		else if (item->op == '+')
 		{
 			ret_item ret_cast_item;
 			evaluate(item->right4, ret_cast_item);
-			auto fn = [](ret_item& v1)->int
+			auto fn = [](ret_item& v1, ret_item& ret)->int
 			{//========================================
 
 			};
-			return fn(ret_cast_item);
+			return fn(ret_cast_item,ret);
 		}
 		else if (item->op == '-')
 		{
 			ret_item ret_cast_item;
 			evaluate(item->right4, ret_cast_item);
-			auto fn = [](ret_item& v1)->int
+			auto fn = [](ret_item& v1, ret_item& ret)->int
 			{//========================================
 
 			};
-			return fn(ret_cast_item);
+			return fn(ret_cast_item,ret);
 		}
 		else if (item->op == '~')
 		{
 			ret_item ret_cast_item;
 			evaluate(item->right4, ret_cast_item);
-			auto fn = [](ret_item& v1)->int
+			auto fn = [](ret_item& v1, ret_item& ret)->int
 			{//========================================
 
 			};
-			return fn(ret_cast_item);
+			return fn(ret_cast_item,ret);
 		}
 		else if (item->op == '!')
 		{
 			ret_item ret_cast_item;
 			evaluate(item->right4, ret_cast_item);
-			auto fn = [](ret_item& v1)->int
+			auto fn = [](ret_item& v1, ret_item& ret)->int
 			{//========================================
 
 			};
-			return fn(ret_cast_item);
+			return fn(ret_cast_item,ret);
 		}
 		if (item->right1)
 		{
@@ -368,7 +464,7 @@ namespace interpret
 			ret_item right_val;
 			evaluate(item->right4, right_val);
 
-			auto fn = [](ret_item& op, ret_item& left_val, ret_item& right_val)->int
+			auto fn = [](ret_item& op, ret_item& left_val, ret_item& right_val, ret_item& ret)->int
 			{//计算赋值运算。
 				if ('=' == op.op)
 				{//=================================
@@ -419,7 +515,7 @@ namespace interpret
 				return 0;
 			};
 
-			return fn(assignment_op, left_val, right_val);
+			return fn(assignment_op, left_val, right_val,ret);
 		}
 
 		return 0;
@@ -498,47 +594,74 @@ namespace interpret
 
 		if (IDENTIFIER == item->op)
 		{//IDENTIFIER
-			using type = name_t<IDENTIFIER>;
-
-			auto item1 = new type();
-			item1->name = item->right;
-			ret.set_item<type>(item1);
+			//这里要根据变量名字拿到变量的地址。
+			auto item_var = find_var(item->right);
+			if (item_var)
+				ret.set_item<var_t>((var_t*)item_var);
+			
 			return item->op;
 		}
 		else if (CONSTANT == item->op)
 		{//CONSTANT
-			using type = value_t<CONSTANT>;
-
-			auto item1 = new type;
-			item1->val = item->right;
-			ret.set_item<type>(item1);
+			//====================================
+			//这个是"const"
+			auto p = new std::string(item->right);
+			if(p)
+				ret.set_item<std::string>(p);
 			return item->op;
 		}
 		else if (F_CONSTANT == item->op)
 		{//F_CONSTANT
-			using type = value_t<F_CONSTANT>;
-
-			auto item1 = new type;
-			item1->val = item->right;
-			ret.set_item<type>(item1);
+			auto item_fconst = find_const(item->right);
+			if (item_fconst)
+			{
+				ret.set_item<const_t>((const_t*)item_fconst);
+			}
+			else
+			{
+				auto item_fconst = new const_t(float(1.0),item->right.c_str());
+				if (item_fconst)
+				{
+					insert_const(item->right, item_fconst);
+					ret.set_item<const_t>((const_t*)item_fconst);
+				}
+			}
 			return item->op;
 		}
 		else if (I_CONSTANT == item->op)
 		{//I_CONSTANT
-			using type = value_t<I_CONSTANT>;
-
-			auto item1 = new type;
-			item1->val = item->right;
-			ret.set_item<type>(item1);
+			auto item_iconst = find_const(item->right);
+			if (item_iconst)
+			{
+				ret.set_item<const_t>((const_t*)item_iconst);
+			}
+			else
+			{
+				auto item_iconst = new const_t(int(100),item->right.c_str());
+				if (item_iconst)
+				{
+					insert_const(item->right, item_iconst);
+					ret.set_item<const_t>((const_t*)item_iconst);
+				}
+			}
 			return item->op;
 		}
 		else if (STRING_LITERAL == item->op)
 		{//STRING_LITERAL
-			using type = value_t<STRING_LITERAL>;
-
-			auto item1 = new type;
-			item1->val = item->right;
-			ret.set_item<type>(item1);
+			auto item_strconst = find_const(item->right);
+			if (item_strconst)
+			{
+				ret.set_item<const_t>((const_t*)item_strconst);
+			}
+			else
+			{
+				auto item_strconst = new const_t(item->right.c_str());
+				if (item_strconst)
+				{
+					insert_const(item->right, item_strconst);
+					ret.set_item<const_t>((const_t*)item_strconst);
+				}
+			}
 			return item->op;
 		}
 		else if ('(' == item->op)

@@ -17,7 +17,7 @@ namespace interpret
 	执行结果压栈，挨层进行计算。
 
 	*/
-
+	int evaluate(item_logical_or_expression* item, ret_item& ret);
 	int evaluate(item_conditional_expression* item, ret_item& ret);
 	int evaluate(item_unary_expression* item, ret_item& ret);
 	int evaluate(item_assignment_operator* item, ret_item& ret);
