@@ -17,10 +17,29 @@ namespace interpret
 	执行结果压栈，挨层进行计算。
 
 	*/
+	int evaluate(item_multiplicative_expression* item, ret_item& ret);
+	int evaluate(ret_item& ret_main, item_additive_expression_ex* item, ret_item& ret);
+	int evaluate(item_additive_expression* item, ret_item& ret);
+	int evaluate(ret_item& ret_main, item_shift_expression_ex* item, ret_item& ret);
+	int evaluate(item_shift_expression* item, ret_item& ret);
+	int evaluate(ret_item& ret_main, item_relational_expression_ex* item, ret_item& ret);
+	int evaluate(item_relational_expression* item, ret_item& ret);
+	int evaluate(ret_item& ret_main, item_equality_expression_ex* item, ret_item& ret);
+	int evaluate(item_equality_expression* item, ret_item& ret);
+	int evaluate(ret_item& ret_main, item_and_expression_ex* item, ret_item& ret);
+	int evaluate(item_and_expression* item, ret_item& ret);
+	int evaluate(item_exclusive_or_expression* item, ret_item& ret);
+	int evaluate(item_inclusive_or_expression* item, ret_item& ret);
+	int evaluate(item_logical_and_expression_ex* item, ret_item& ret);
+	int evaluate(item_logical_and_expression* item, ret_item& ret);
 	int evaluate(item_logical_or_expression* item, ret_item& ret);
 	int evaluate(item_conditional_expression* item, ret_item& ret);
 	int evaluate(item_unary_expression* item, ret_item& ret);
 	int evaluate(item_assignment_operator* item, ret_item& ret);
+
+	int evaluate(item_identifier* item, ret_item& ret);
+	int evaluate(item_argument_expression_list* item, ret_item& ret);
+	int evaluate(item_postfix_expression_ex* item, ret_item& ret);
 	int evaluate(item_postfix_expression* item, ret_item& ret);
 	int evaluate(item_cast_expression* item, ret_item& ret);
 	int evaluate(item_type_specifier* item, ret_item& ret);

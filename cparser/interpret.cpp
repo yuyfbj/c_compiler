@@ -1,18 +1,450 @@
 #include "interpret.h"
 namespace interpret
 {
-	int evaluate(item_logical_and_expression* item, ret_item& ret)
+	int evaluate(ret_item& ret_main, item_multiplicative_expression_ex* item, ret_item& ret)
 	{
+		/*
+		multiplicative_expression_ex
+		:  '*' cast_expression multiplicative_expression_ex
+		|  '/' cast_expression multiplicative_expression_ex
+		|  '%' cast_expression multiplicative_expression_ex
+		|EMPTY
+		;
+		*/
+		ret_item ret_cast_item;
+		evaluate(item->right1, ret_cast_item);
+		if (item->op == '*')
+		{
+			auto ret_p = ret_main.mul_op(ret_cast_item);
+			if (item->right2)
+			{
+				return evaluate(*ret_p, item->right2, ret);
+			}
+			ret = *ret_p;
+			return item->op;
+		}
+		else if (item->op == '/')
+		{
+			auto ret_p = ret_main.div_op(ret_cast_item);
+			if (item->right2)
+			{
+				return evaluate(*ret_p, item->right2, ret);
+			}
+			ret = *ret_p;
+			return item->op;
+		}
+		else if (item->op == '%')
+		{
+			auto ret_p = ret_main.mod_op(ret_cast_item);
+			if (item->right2)
+			{
+				return evaluate(*ret_p, item->right2, ret);
+			}
+			ret = *ret_p;
+			return item->op;
+		}
 
 
 		return 0;
 	}
-	int evaluate(item_logical_or_expression_ex* item, ret_item& ret)
+	int evaluate(item_multiplicative_expression* item, ret_item& ret)
+	{
+
+		/*multiplicative_expression
+		: cast_expression
+		| multiplicative_expression '*' cast_expression
+		| multiplicative_expression '/' cast_expression
+		| multiplicative_expression '%' cast_expression
+		;
+
+		multiplicative_expression
+		: cast_expression   multiplicative_expression_ex
+		;
+		multiplicative_expression_ex
+		:  '*' cast_expression multiplicative_expression_ex
+		|  '/' cast_expression multiplicative_expression_ex
+		|  '%' cast_expression multiplicative_expression_ex
+		;
+		*/
+
+		if (item->right1 && item->right2 == NULL)
+		{
+			return evaluate(item->right1, ret);
+		}
+		else if (item->right1 && item->right2)
+		{
+			ret_item ret_cast_item;
+			evaluate(item->right1, ret_cast_item);
+			return evaluate(ret_cast_item, item->right2, ret);
+		}
+		return 0;
+	}
+	int evaluate(ret_item& ret_main, item_additive_expression_ex* item, ret_item& ret)
 	{
 		/*
-		logical_or_expression_ex
-		: OR_OP logical_and_expression logical_or_expression_ex
+			additive_expression
+		: '+' multiplicative_expression additive_expression_ex
+		|  '-' multiplicative_expression additive_expression_ex
 		|EMPTY
+		;
+		*/
+		ret_item ret_mul_item;
+		evaluate(item->right1, ret_mul_item);
+		if (item->op == '+')
+		{
+			auto ret_p = ret_main.add_op(ret_mul_item);
+			if (item->right2)
+			{
+				return evaluate(*ret_p, item->right2, ret);
+			}
+			ret = *ret_p;
+			return item->op;
+		}
+		else if (item->op == '-')
+		{
+			auto ret_p = ret_main.sub_op(ret_mul_item);
+			if (item->right2)
+			{
+				return evaluate(*ret_p, item->right2, ret);
+			}
+			ret = *ret_p;
+			return item->op;
+
+		}
+
+
+		return 0;
+	}
+	int evaluate(item_additive_expression* item, ret_item& ret)
+	{
+		/*additive_expression
+		: multiplicative_expression
+		| additive_expression '+' multiplicative_expression
+		| additive_expression '-' multiplicative_expression
+		;
+
+		additive_expression
+		: multiplicative_expression additive_expression_ex
+		;
+		additive_expression
+		: '+' multiplicative_expression additive_expression_ex
+		|  '-' multiplicative_expression additive_expression_ex
+		|EMPTY
+		;
+		*/
+		if (item->right1 && item->right2 == NULL)
+		{
+			return evaluate(item->right1, ret);
+		}
+		else if (item->right1 && item->right2)
+		{
+			ret_item ret_mul_item;
+			evaluate(item->right1, ret_mul_item);
+			return evaluate(ret_mul_item, item->right2, ret);
+		}
+
+
+
+		return 0;
+	}
+
+	int evaluate(ret_item& ret_main,item_shift_expression_ex* item, ret_item& ret)
+	{
+		/*
+		shift_expression_ex
+		:  LEFT_OP additive_expression shift_expression_ex
+		|  RIGHT_OP additive_expression shift_expression_ex
+		|EMPTY
+		;
+		*/
+		ret_item ret_add_item;
+		evaluate(item->right1, ret_add_item);
+		if (item->op == LEFT_OP)
+		{
+			auto ret_p = ret_main.shift_left_op(ret_add_item);
+			if (item->right2)
+			{
+				return evaluate(*ret_p, item->right2, ret);
+			}
+			ret = *ret_p;
+			return item->op;
+		}
+		else if (item->op == RIGHT_OP)
+		{
+			auto ret_p = ret_main.shift_right_op(ret_add_item);
+			if (item->right2)
+			{
+				return evaluate(*ret_p, item->right2, ret);
+			}
+			ret = *ret_p;
+			return item->op;
+
+		}
+
+		return 0;
+	}
+	int evaluate(item_shift_expression* item, ret_item& ret)
+	{
+		/*shift_expression
+		: additive_expression
+		| shift_expression LEFT_OP additive_expression
+		| shift_expression RIGHT_OP additive_expression
+		;
+		shift_expression
+		: additive_expression  shift_expression_ex
+		;
+		shift_expression_ex
+		:  LEFT_OP additive_expression shift_expression_ex
+		|  RIGHT_OP additive_expression shift_expression_ex
+		|EMPTY
+		;
+		*/
+		if (item->right1 && item->right2 == NULL)
+		{
+			return evaluate(item->right1, ret);
+		}
+		else if (item->right1 && item->right2)
+		{
+			ret_item ret_add_item;
+			evaluate(item->right1, ret_add_item);
+			return evaluate(ret_add_item, item->right2, ret);
+		}
+
+
+
+		return 0;
+	}
+	int evaluate(ret_item& ret_main,item_relational_expression_ex* item, ret_item& ret)
+	{
+		/*
+		relational_expression_ex
+		: '<' shift_expression   relational_expression_ex
+		|  '>' shift_expression  relational_expression_ex
+		|  LE_OP shift_expression  relational_expression_ex
+		|  GE_OP shift_expression  relational_expression_ex
+		|EMPTY
+		;
+		*/
+		ret_item ret_rel_item;
+		evaluate(item->right1, ret_rel_item);
+		if (item->op == '>')
+		{
+			auto ret_p = ret_main.rel_great_op(ret_rel_item);
+			if (item->right2)
+			{
+				return evaluate(*ret_p, item->right2, ret);
+			}
+			ret = *ret_p;
+			return item->op;
+		}
+		else if (item->op == '<')
+		{
+			auto ret_p = ret_main.rel_low_op(ret_rel_item);
+			if (item->right2)
+			{
+				return evaluate(*ret_p, item->right2, ret);
+			}
+			ret = *ret_p;
+			return item->op;
+		}
+		else if (item->op == LE_OP)
+		{
+			auto ret_p = ret_main.rel_le_op(ret_rel_item);
+			if (item->right2)
+			{
+				return evaluate(*ret_p, item->right2, ret);
+			}
+			ret = *ret_p;
+			return item->op;
+
+		}
+		else if (item->op == GE_OP)
+		{
+			auto ret_p = ret_main.rel_ge_op(ret_rel_item);
+			if (item->right2)
+			{
+				return evaluate(*ret_p, item->right2, ret);
+			}
+			ret = *ret_p;
+			return item->op;
+		}
+
+
+		return 0;
+	}
+	int evaluate(item_relational_expression* item, ret_item& ret)
+	{
+		//relational_expression
+		//	: shift_expression
+		//	| relational_expression '<' shift_expression
+		//	| relational_expression '>' shift_expression
+		//	| relational_expression LE_OP shift_expression
+		//	| relational_expression GE_OP shift_expression
+		//	;
+
+		/*
+		relational_expression
+		: shift_expression relational_expression_ex
+		;
+		relational_expression_ex
+		: '<' shift_expression   relational_expression_ex
+		|  '>' shift_expression  relational_expression_ex
+		|  LE_OP shift_expression  relational_expression_ex
+		|  GE_OP shift_expression  relational_expression_ex
+		|EMPTY
+		;
+		*/
+		if (item->right1 && item->right2 == NULL)
+		{
+			return evaluate(item->right1, ret);
+		}
+		else if (item->right1 && item->right2)
+		{
+			ret_item ret_shift_item;
+			evaluate(item->right1, ret_shift_item);
+			return evaluate(ret_shift_item, item->right2, ret);
+		}
+		return 0;
+	}
+	int evaluate(ret_item& ret_main,item_equality_expression_ex* item, ret_item& ret)
+	{
+		/*
+		equality_expression_ex
+		: EQ_OP relational_expression equality_expression_ex
+		| NE_OP relational_expression equality_expression_ex
+		| EMPTY
+		*/
+		ret_item ret_rel_item;
+		evaluate(item->right1, ret_rel_item);
+		if (item->op == EQ_OP)
+		{
+			auto ret_p = ret_main.rel_eq_op(ret_rel_item);
+			if (item->right2)
+			{
+				return evaluate(*ret_p, item->right2, ret);
+			}
+			ret = *ret_p;
+			return item->op;
+		}
+		else if (item->op == NE_OP)
+		{
+			auto ret_p = ret_main.rel_ne_op(ret_rel_item);
+			if (item->right2)
+			{
+				return evaluate(*ret_p, item->right2, ret);
+			}
+			ret = *ret_p;
+			return item->op;
+		}
+
+		return 0;
+	}
+	int evaluate(item_equality_expression* item, ret_item& ret)
+	{
+		/*equality_expression
+		: relational_expression
+		| equality_expression EQ_OP relational_expression
+		| equality_expression NE_OP relational_expression
+		;
+
+		equality_expression
+		: relational_expression equality_expression_ex
+		;
+		equality_expression_ex
+		: EQ_OP relational_expression equality_expression_ex
+		| NE_OP relational_expression equality_expression_ex
+		| EMPTY
+		*/
+		if (item->right1 && item->right2 == NULL)
+		{
+			return evaluate(item->right1, ret);
+		}
+		else if (item->right1 && item->right2)
+		{
+			ret_item ret_rel_item;
+			evaluate(item->right1, ret_rel_item);
+			return evaluate(ret_rel_item, item->right2, ret);
+		}
+		return 0;
+	}
+	int evaluate(ret_item& ret_main, item_and_expression_ex* item, ret_item& ret)
+	{
+		/*
+		and_expression_ex
+		:	 '&' equality_expression and_expression_ex
+		|EMPTY
+		*/
+		ret_item ret_equ_item;
+		evaluate(item->right1, ret_equ_item);
+		auto ret_p = ret_main.bit_and_op(ret_equ_item);
+		if (item->right2)
+		{
+			return evaluate(*ret_p, item->right2, ret);
+		}
+		ret = *ret_p;
+		return item->op;
+	}
+	
+	int evaluate(item_and_expression* item, ret_item& ret)
+	{
+		/*and_expression
+		: equality_expression
+		| and_expression '&' equality_expression
+		;
+
+		and_expression
+		: equality_expression and_expression_ex
+		;
+		and_expression_ex
+		:	 '&' equality_expression and_expression_ex
+		|EMPTY
+		*/
+
+		if (item->right1 && item->right2 == NULL)
+		{
+			return evaluate(item->right1, ret);
+		}
+		else if (item->right1 && item->right2)
+		{
+			ret_item ret_equ_item;
+			evaluate(item->right1, ret_equ_item);
+			return evaluate(ret_equ_item, item->right2, ret);
+		}
+		return 0;
+	}
+	int evaluate(ret_item& ret_main,item_exclusive_or_expression_ex* item, ret_item& ret)
+	{
+		/*
+			exclusive_or_expression_ex
+		|  '^' and_expression exclusive_or_expression_ex
+		|EMPTY
+		;
+		*/
+		ret_item ret_and_item;
+		evaluate(item->right1, ret_and_item);
+		ret_item* ret_p = ret_main.xor_op(ret_and_item);
+		if (item->right2)
+		{
+			return evaluate(*ret_p, item->right2, ret);
+		}
+		ret = *ret_p;
+		return item->op;
+	}
+
+	int evaluate(item_exclusive_or_expression* item, ret_item& ret)
+	{
+		/*exclusive_or_expression
+		: and_expression
+		| exclusive_or_expression '^' and_expression
+		;
+
+		exclusive_or_expression
+		: and_expression  exclusive_or_expression_ex
+		;
+		exclusive_or_expression_ex
+		|  '^' and_expression exclusive_or_expression_ex
+		|EMPTY
+		;
 		*/
 
 		if (item->right1 && item->right2 == NULL)
@@ -23,20 +455,129 @@ namespace interpret
 		{
 			ret_item ret_and_item;
 			evaluate(item->right1, ret_and_item);
-			ret_item ret_orex_item;
-			evaluate(item->right2, ret_orex_item);
+			return evaluate(ret_and_item, item->right2, ret);
+		}
+		return 0;
+	}
+	int evaluate(ret_item& ret_main, item_inclusive_or_expression_ex* item, ret_item& ret)
+	{
+		/*
+			inclusive_or_expression_ex
+			:  '|' exclusive_or_expression inclusive_or_expression_ex
+			|EMPTY;
+		*/
+		ret_item ret_ioe_item;
+		evaluate(item->right1, ret_ioe_item);
+		auto ret_p = ret_main.bit_or_op(ret_ioe_item);
+		if (item->right2)
+		{
+			return evaluate(*ret_p, item->right2, ret);
+		}
+		ret = *ret_p;
+		return item->op;
+		
+	}
+	int evaluate(item_inclusive_or_expression* item, ret_item& ret)
+	{
+		/*inclusive_or_expression
+		: exclusive_or_expression
+		| inclusive_or_expression '|' exclusive_or_expression
+		;
 
-			auto fn = [](ret_item& v1, ret_item& v2, ret_item& ret)->int
+		inclusive_or_expression
+		: exclusive_or_expression inclusive_or_expression_ex
+		;
+		inclusive_or_expression_ex
+		:  '|' exclusive_or_expression inclusive_or_expression_ex
+		|EMPTY;
+		*/
+
+		if (item->right1 && item->right2 == NULL)
+		{	
+			return evaluate(item->right1, ret);
+		}
+		else if (item->right1 && item->right2)
+		{
+			ret_item ret_eoe_item;
+			evaluate(item->right1, ret_eoe_item);
+			
+			return evaluate(ret_eoe_item, item->right2, ret);
+		}
+
+		return 0;
+	}
+	int evaluate(ret_item& ret_main,item_logical_and_expression_ex* item, ret_item& ret)
+	{
+		/*logical_and_expression_ex
+		:  AND_OP inclusive_or_expression 	logical_and_expression_ex
+		|EMPTY
+		*/
+		ret_item ret_ioe_item;
+		evaluate(item->right1, ret_ioe_item);
+
+		auto ret_p = ret_main.logic_and(ret_ioe_item);
+		if (item->right2)
+		{
+			return evaluate(*ret_p, item->right2, ret);
+		}
+		ret = *ret_p;
+		return item->op;
+	}
+	int evaluate(item_logical_and_expression* item, ret_item& ret)
+	{
+		/*logical_and_expression
+		: inclusive_or_expression
+		| logical_and_expression AND_OP inclusive_or_expression
+		;
+		logical_and_expression
+		: inclusive_or_expression  logical_and_expression_ex
+		;
+		logical_and_expression_ex
+		:  AND_OP inclusive_or_expression 	logical_and_expression_ex
+		|EMPTY
+		;*/
+
+		if (item->right1 && item->right2 == NULL)
+		{
+			return evaluate(item->right1, ret);
+		}
+		else if (item->right1 && item->right2)
+		{
+			ret_item ret_ioe_item;
+			evaluate(item->right1, ret_ioe_item);
+			return evaluate(ret_ioe_item, item->right2, ret);
+		}
+		return 0;
+	}
+	int evaluate(ret_item& ret_main,item_logical_or_expression_ex* item, ret_item& ret)
+	{
+		/*
+		logical_or_expression_ex
+		: OR_OP logical_and_expression logical_or_expression_ex
+		|EMPTY
+		*/
+
+		if (item->right1 && item->right2 == NULL)
+		{
+			ret_item ret_lae_item;
+			evaluate(item->right1, ret);
+
+			auto ret_p = ret_main.logic_or(ret_lae_item);
+			ret = *ret_p;
+			return item->op;
+		}
+		else if (item->right1 && item->right2)
+		{
+			ret_item ret_lae_item;
+			evaluate(item->right1, ret);
+
+			auto ret_p = ret_main.logic_or(ret_lae_item);
+			if (item->right2)
 			{
-				auto bool_ptr1 = v1.get_item<bool>();
-				auto bool_ptr2 = v2.get_item<bool>();
-				auto bool_ptr_result = new bool((*bool_ptr1) || (*bool_ptr2));
-				ret.set_item<bool>(bool_ptr_result);
-
-				return 0;
-			};
-			return fn(ret_and_item, ret_orex_item, ret);
-
+				return evaluate(*ret_p, item->right2, ret);
+			}
+			ret = *ret_p;
+			return item->op;
 		}
 
 		return 0;
@@ -64,18 +605,8 @@ namespace interpret
 		{
 			ret_item ret_and_item;
 			evaluate(item->right1, ret_and_item);
-			ret_item ret_orex_item;
-			evaluate(item->right2, ret_orex_item);
-			auto fn = [](ret_item& v1,ret_item& v2,ret_item& ret)->int
-			{
-				auto bool_ptr1 = v1.get_item<bool>();
-				auto bool_ptr2 = v2.get_item<bool>();
-				auto bool_ptr_result = new bool((*bool_ptr1) || (*bool_ptr2));
-				ret.set_item<bool>(bool_ptr_result);
-
-				return 0;
-			};
-			return fn( ret_and_item, ret_orex_item, ret);
+			
+			return evaluate(ret_and_item,item->right2, ret);
 		}
 
 		return 0;
@@ -130,10 +661,154 @@ namespace interpret
 
 		return 0;
 	}
+	int evaluate(item_identifier* item, ret_item& ret)
+	{
+		auto item_var = find_var(item->right);
+		if (item_var)
+			ret.set_item<var_t>((var_t*)item_var);
+
+		return item->op;
+	}
+	int evaluate(item_argument_expression_list* item, ret_item& ret)
+	{
+
+
+
+
+		return 0;
+	}
+	int evaluate(ret_item& ret_primary_item,item_postfix_expression_ex* item, ret_item& ret)
+	{
+		/*
+			postfix_expression_ex
+		: '[' expression ']'   postfix_expression_ex
+		| '(' ')'  postfix_expression_ex
+		| '(' argument_expression_list ')'   postfix_expression_ex
+		| '.' IDENTIFIER  postfix_expression_ex
+		| PTR_OP IDENTIFIER   postfix_expression_ex
+		|  INC_OP    postfix_expression_ex
+		|  DEC_OP    postfix_expression_ex
+		| EMPTY
+		*/
+
+
+		if (item->op == '[')
+		{//'[' expression ']'   postfix_expression_ex
+			ret_item ret_expr_item;
+			evaluate(item->right1, ret_expr_item);
+			ret_item* ret_p = (ret_primary_item)[ret_expr_item];
+
+			ret = *ret_p;
+			return item->op;
+		}
+		else if (item->op == '(')
+		{	
+			//这里处理的是函数调用。
+			if (item->right4 == NULL)
+			{//| '(' ')'  postfix_expression_ex
+				ret_item* ret_p = (ret_primary_item)();
+				ret = *ret_p;
+				return item->op;
+			}
+			else
+			{//| '(' argument_expression_list ')'   postfix_expression_ex
+				ret_item ret_ael_item;
+				evaluate(item->right4, ret_ael_item);
+				ret_item* ret_p = (ret_primary_item)(ret_ael_item);
+				if (item->right2)
+				{	
+					return evaluate(*ret_p,item->right2, ret);
+				}
+				ret = *ret_p;
+				return item->op;
+			}
+			return 0;
+		}
+		else if (item->op == '.')
+		{// '.' IDENTIFIER  postfix_expression_ex
+			ret_item ret_id_item;
+			evaluate(item->right3, ret_id_item);
+			ret_item* ret_p = ret_primary_item.dot_op(ret_id_item);
+			if (item->right2)
+			{
+				return evaluate(*ret_p, item->right2, ret);
+			}
+			ret = *ret_p;
+			return item->op;
+		}
+		else if (item->op == PTR_OP)
+		{//PTR_OP IDENTIFIER   postfix_expression_ex。
+			ret_item ret_id_item;
+			evaluate(item->right3, ret_id_item);
+			ret_item* ret_p = ret_primary_item.ptr_op(ret_id_item);
+			if (item->right2)
+			{
+				return evaluate(*ret_p, item->right2, ret);
+			}
+			ret = *ret_p;
+			return item->op;
+
+		}
+		else if (item->op == INC_OP)
+		{// INC_OP    postfix_expression_ex
+			auto ret_result = ret_primary_item.post_inc();
+			if (item->right2)
+			{
+				return evaluate(ret_result, item->right2, ret);
+			}
+		}
+		else if (item->op == DEC_OP)
+		{//DEC_OP    postfix_expression_ex。
+			auto ret_result = ret_primary_item.post_dec();
+			if (item->right2)
+			{
+				return evaluate(ret_result, item->right2, ret);
+			}
+		}
+
+		return 0;
+	}
 
 	int evaluate(item_postfix_expression* item, ret_item& ret)
 	{
+		//postfix_expression
+		//	: primary_expression
+		//	| postfix_expression '[' expression ']'
+		//	| postfix_expression '(' ')'
+		//	| postfix_expression '(' argument_expression_list ')'
+		//	| postfix_expression '.' IDENTIFIER
+		//	| postfix_expression PTR_OP IDENTIFIER
+		//	| postfix_expression INC_OP
+		//	| postfix_expression DEC_OP
+		//	;
 
+		/*消除左递归后
+		postfix_expression
+		: primary_expression postfix_expression_ex
+		;
+		postfix_expression_ex
+		: '[' expression ']'   postfix_expression_ex
+		| '(' ')'  postfix_expression_ex
+		| '(' argument_expression_list ')'   postfix_expression_ex
+		| '.' IDENTIFIER  postfix_expression_ex
+		| PTR_OP IDENTIFIER   postfix_expression_ex
+		|  INC_OP    postfix_expression_ex
+		|  DEC_OP    postfix_expression_ex
+		| EMPTY
+
+		*/
+
+		if (item->right1 && item->right2 == NULL)
+		{
+			return evaluate(item->right1, ret);
+		}
+		else if (item->right1 && item->right2)
+		{
+			ret_item ret_primary_item;
+			evaluate(item->right1, ret_primary_item);
+			
+			return evaluate(ret_primary_item, item->right2, ret);
+		}
 
 		return 0;
 	}
@@ -153,12 +828,9 @@ namespace interpret
 			ret_item ret_cast_item;
 			evaluate(item->right3, ret_cast_item);
 
-			auto fn = [](ret_item& v1,ret_item& v2,ret_item& ret)->int
-			{//==============================================
-
-			};
-
-			return fn(ret_type_name,ret_cast_item,ret);
+			auto ret_p = ret_cast_item.convert_type(ret_type_name);
+			ret = *ret_p;
+			return item->op;
 		}
 
 		return 0;
@@ -331,23 +1003,17 @@ namespace interpret
 		{
 			ret_item ret_unary_item;
 			evaluate(item->right2, ret_unary_item);
-			auto fn = [](ret_item& v1,ret_item& ret)->int
-			{//=================================
-
-
-			};
-			return fn(ret_unary_item,ret);
+			auto ret_ref = ret_unary_item.pre_inc();
+			ret = ret_ref;
+			return item->op;
 		}
 		else if (item->op == DEC_OP)
 		{
 			ret_item ret_unary_item;
 			evaluate(item->right2, ret_unary_item);
-			auto fn = [](ret_item& v1,ret_item& ret)->int
-			{//=================================
-
-
-			};
-			return fn(ret_unary_item,ret);
+			auto ret_ref = ret_unary_item.pre_dec();
+			ret = ret_ref;
+			return item->op;
 		}
 		else if (item->op == SIZEOF)
 		{
@@ -355,84 +1021,68 @@ namespace interpret
 			{
 				ret_item ret_unary_item;
 				evaluate(item->right2, ret_unary_item);
-				auto fn = [](ret_item& v1,ret_item& ret)->int
-				{//=================================
-
-
-				};
-				return fn(ret_unary_item,ret);
+				auto ret_p = ret_unary_item.sizeof_op();
+				ret = *ret_p;
+				return item->op;
 			}
 			else if (item->right4)
 			{
 				ret_item ret_type_name_item;
 				evaluate(item->right4, ret_type_name_item);
-				auto fn = [](ret_item& v1,ret_item& ret)->int
-				{//=================================
-
-
-				};
-				return fn(ret_type_name_item,ret);
+				auto ret_p = ret_type_name_item.sizeof_op();
+				ret = *ret_p;
+				return item->op;
 			}
 		}
 		else if (item->op == '&')
 		{
 			ret_item ret_cast_item;
 			evaluate(item->right4, ret_cast_item);
-			auto fn = [](ret_item& v1,ret_item& ret)->int
-			{//========================================
-
-			};
-			return fn(ret_cast_item,ret);
+			
+			auto ret_p = ret_cast_item.bit_and_op(ret_cast_item);
+			ret = *ret_p;
+			return item->op;
 		}
 		else if (item->op == '*')
 		{
 			ret_item ret_cast_item;
 			evaluate(item->right4, ret_cast_item);
-			auto fn = [](ret_item& v1, ret_item& ret)->int
-			{//========================================
-
-			};
-			return fn(ret_cast_item,ret);
+			auto ret_p = ret_cast_item.star_op();
+			ret = *ret_p;
+			return item->op;
 		}
 		else if (item->op == '+')
 		{
 			ret_item ret_cast_item;
 			evaluate(item->right4, ret_cast_item);
-			auto fn = [](ret_item& v1, ret_item& ret)->int
-			{//========================================
-
-			};
-			return fn(ret_cast_item,ret);
+			auto ret_p = ret_cast_item.add_sign_op();
+			ret = *ret_p;
+			return item->op;
 		}
 		else if (item->op == '-')
 		{
 			ret_item ret_cast_item;
 			evaluate(item->right4, ret_cast_item);
-			auto fn = [](ret_item& v1, ret_item& ret)->int
-			{//========================================
-
-			};
-			return fn(ret_cast_item,ret);
+			auto ret_p = ret_cast_item.sub_sign_op();
+			ret = *ret_p;
+			return item->op;
 		}
 		else if (item->op == '~')
 		{
 			ret_item ret_cast_item;
 			evaluate(item->right4, ret_cast_item);
-			auto fn = [](ret_item& v1, ret_item& ret)->int
-			{//========================================
-
-			};
-			return fn(ret_cast_item,ret);
+			auto ret_p = ret_cast_item.bit_inv_op();
+			ret = *ret_p;
+			return item->op;
 		}
 		else if (item->op == '!')
 		{
 			ret_item ret_cast_item;
 			evaluate(item->right4, ret_cast_item);
-			auto fn = [](ret_item& v1, ret_item& ret)->int
-			{//========================================
+			auto ret_p = ret_cast_item.logical_not();
+			ret = *ret_p;
+			return item->op;
 
-			};
-			return fn(ret_cast_item,ret);
 		}
 		if (item->right1)
 		{
@@ -464,58 +1114,54 @@ namespace interpret
 			ret_item right_val;
 			evaluate(item->right4, right_val);
 
-			auto fn = [](ret_item& op, ret_item& left_val, ret_item& right_val, ret_item& ret)->int
-			{//计算赋值运算。
-				if ('=' == op.op)
-				{//=================================
-
-				}
-				else if (MUL_ASSIGN == op.op)
-				{//=================================
-
-				}
-				else if (DIV_ASSIGN == op.op)
-				{//=================================
-
-				}
-				else if (MOD_ASSIGN == op.op)
-				{//=================================
-
-				}
-				else if (ADD_ASSIGN == op.op)
-				{//=================================
-
-				}
-				else if (SUB_ASSIGN == op.op)
-				{//=================================
-
-				}
-				else if (LEFT_ASSIGN == op.op)
-				{//=================================
-
-				}
-				else if (RIGHT_ASSIGN == op.op)
-				{//=================================
-
-				}
-				else if (AND_ASSIGN == op.op)
-				{//=================================
-
-				}
-				else if (XOR_ASSIGN == op.op)
-				{//=================================
-
-				}
-				else if (OR_ASSIGN == op.op)
-				{//=================================
-
-				}
-
-
-				return 0;
-			};
-
-			return fn(assignment_op, left_val, right_val,ret);
+			//计算赋值运算。
+			if ('=' == assignment_op.op)
+			{
+				left_val = right_val;
+			}
+			else if (MUL_ASSIGN == assignment_op.op)
+			{
+				left_val *= right_val;
+			}
+			else if (DIV_ASSIGN == assignment_op.op)
+			{
+				left_val /= right_val;
+			}
+			else if (MOD_ASSIGN == assignment_op.op)
+			{
+				left_val %= right_val;
+			}
+			else if (ADD_ASSIGN == assignment_op.op)
+			{
+				left_val += right_val;
+			}
+			else if (SUB_ASSIGN == assignment_op.op)
+			{
+				left_val -= right_val;
+			}
+			else if (LEFT_ASSIGN == assignment_op.op)
+			{
+				left_val <<= right_val;
+			}
+			else if (RIGHT_ASSIGN == assignment_op.op)
+			{
+				left_val >>= right_val;
+			}
+			else if (AND_ASSIGN == assignment_op.op)
+			{
+				left_val &= right_val;
+			}
+			else if (XOR_ASSIGN == assignment_op.op)
+			{
+				left_val ^= right_val;
+			}
+			else if (OR_ASSIGN == assignment_op.op)
+			{
+				left_val |= right_val;
+			}
+			ret = left_val;
+			return assignment_op.op;
+			
 		}
 
 		return 0;
@@ -619,7 +1265,8 @@ namespace interpret
 			}
 			else
 			{
-				auto item_fconst = new const_t(float(1.0),item->right.c_str());
+				float f = atof(item->right.c_str());
+				auto item_fconst = new const_t(f,item->right.c_str());
 				if (item_fconst)
 				{
 					insert_const(item->right, item_fconst);
@@ -637,7 +1284,8 @@ namespace interpret
 			}
 			else
 			{
-				auto item_iconst = new const_t(int(100),item->right.c_str());
+				int i = atoi(item->right.c_str());
+				auto item_iconst = new const_t(i,item->right.c_str());
 				if (item_iconst)
 				{
 					insert_const(item->right, item_iconst);

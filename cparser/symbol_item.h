@@ -47,6 +47,264 @@ namespace symbol
 	//
 	struct ret_item
 	{
+		ret_item* operator[](ret_item& v1)
+		{
+
+			return NULL;
+		}
+
+		ret_item* operator()(ret_item& v1)
+		{
+
+			return NULL;
+		}
+
+		ret_item* operator()()
+		{
+
+			return NULL;
+		}
+		ret_item* dot_op(ret_item& v1)
+		{
+
+
+			return NULL;
+		}
+		ret_item* ptr_op(ret_item& v1)
+		{
+			return NULL;
+		}
+
+		ret_item* sizeof_op()
+		{
+
+			return NULL;
+		}
+
+		ret_item* bit_and_op(ret_item& v1)
+		{
+
+			return NULL;
+		}
+		ret_item* bit_inv_op()
+		{
+
+
+			return NULL;
+		}
+
+		ret_item* bit_or_op(ret_item& v1)
+		{
+
+
+			return NULL;
+		}
+		ret_item* convert_type(ret_item& v1)
+		{
+
+			return NULL;
+		}
+		ret_item* logical_not()
+		{
+
+			return NULL;
+		}
+
+		ret_item* logic_or(ret_item& v1)
+		{
+			return NULL;
+		}
+		ret_item* logic_and(ret_item& v1)
+		{
+			return NULL;
+		}
+		ret_item* rel_eq_op(ret_item& v1)
+		{
+			return NULL;
+		}
+		ret_item* rel_ne_op(ret_item& v1)
+		{
+
+			return NULL;
+		}
+		ret_item* rel_low_op(ret_item& v1)
+		{
+
+			return NULL;
+		}
+		ret_item* rel_great_op(ret_item& v1)
+		{
+
+			return NULL;
+		}
+
+		ret_item* rel_le_op(ret_item& v1)
+		{
+
+			return NULL;
+		}
+		ret_item* rel_ge_op(ret_item& v1)
+		{
+
+			return NULL;
+		}
+
+		ret_item* shift_left_op(ret_item& v1)
+		{
+
+			return NULL;
+		}
+		ret_item* shift_right_op(ret_item& v1)
+		{
+
+			return NULL;
+		}
+		ret_item* add_op(ret_item& v1)
+		{
+			return NULL;
+		}
+		ret_item* sub_op(ret_item& v1)
+		{
+			return NULL;
+		}
+
+		ret_item* mul_op(ret_item& v1)
+		{
+
+			return NULL;
+		}
+
+		ret_item* div_op(ret_item& v1)
+		{
+
+			return NULL;
+		}
+
+		ret_item* mod_op(ret_item& v1)
+		{
+
+			return NULL;
+		}
+
+
+
+		ret_item* star_op()
+		{
+
+			return NULL;
+		}
+		ret_item* add_sign_op()
+		{
+
+			return NULL;
+		}
+		ret_item* sub_sign_op()
+		{
+
+			return NULL;
+		}
+
+		ret_item* xor_op(ret_item& v1)
+		{
+			return NULL;
+		}
+		
+
+		ret_item& post_inc()
+		{
+
+			return *this;
+		}
+		ret_item& post_dec()
+		{
+
+			return *this;
+		}
+
+		ret_item& pre_inc()
+		{
+
+			return *this;
+		}
+		ret_item& pre_dec()
+		{
+			return *this;
+		}
+		
+		ret_item& operator *=(const ret_item& v1)
+		{
+
+
+			return *this;
+		}
+		ret_item& operator +=(const ret_item& v1)
+		{
+
+
+			return *this;
+		}
+		ret_item& operator -=(const ret_item& v1)
+		{
+
+
+			return *this;
+		}
+		ret_item& operator /=(const ret_item& v1)
+		{
+
+
+			return *this;
+		}
+		ret_item& operator %=(const ret_item& v1)
+		{
+
+
+			return *this;
+		}
+		ret_item& operator <<=(const ret_item& v1)
+		{
+
+
+			return *this;
+		}
+		ret_item& operator >>=(const ret_item& v1)
+		{
+
+
+			return *this;
+		}
+
+		ret_item& operator &=(const ret_item& v1)
+		{
+
+
+			return *this;
+		}
+		ret_item& operator |=(const ret_item& v1)
+		{
+
+
+			return *this;
+		}
+		ret_item& operator ^=(const ret_item& v1)
+		{
+
+
+			return *this;
+		}
+
+
+
+
+
+
+		ret_item& operator = (const ret_item& v1)
+		{
+			this->op = v1.op;
+			this->type = v1.type;
+			this->item = v1.item;
+			return *this;
+		}
 		int op = 0;
 		int type = 0;
 		template<class T>
@@ -131,6 +389,8 @@ namespace symbol
 		}
 	};
 	
+
+
 	//变量
 	struct var_t:public item
 	{
@@ -142,17 +402,26 @@ namespace symbol
 
 		enum vt{
 			vt_void_ptr = 100
-			,vt_char_ptr
-			,vt_short_ptr
-			,vt_int_ptr
-			,vt_long_ptr
-			,vt_float_ptr
-			,vt_double_ptr
-			,vt_struct_ptr
-			,vt_enum_ptr
+			,vt_char
+			,vt_short
+			,vt_int
+			,vt_long
+			,vt_float
+			,vt_double
+			,vt_struct
+			,vt_enum
+			,vt_array
 		};
+		enum rt
+		{
+			rt_address = 100
+			,rt_value
+		};
+		int ref_type = 0;
 		int var_type = 0;
 		int size = 0;
+		int array_item_size = 0;
+		int array_item_type = 0;
 		std::string name;
 		
 		union
@@ -166,29 +435,36 @@ namespace symbol
 			double* double_ptr;
 			void*   struct_ptr;
 			void*   enum_ptr;
+			void*   array_ptr;
 		};
+		//各种运算符操作
+
+	
+
+
+
 	};
 
 	//常量
 
 	struct const_t :public var_t
 	{
-		const_t(float f,const char* val)
+		const_t(float fval,const char* val)
 		{
 			name = val;
-			float fval = atof(val);
+
 			type = CONST;
-			var_type = vt_float_ptr;
+			var_type = vt_float;
 			size = sizeof(float);
 			float_ptr = new float(fval);
 			
 		}
-		const_t(int i,const char* val)
+		const_t(int ival,const char* val)
 		{
 			name = val;
-			int ival = atoi(val);
+		
 			type = CONST;
-			var_type = vt_int_ptr;
+			var_type = vt_int;
 			size = sizeof(int);
 			int_ptr = new int(ival);
 			
@@ -198,7 +474,7 @@ namespace symbol
 		{
 			name = pstr;
 			type = CONST;
-			var_type = vt_char_ptr;
+			var_type = vt_char;
 			size = strlen(pstr) + 1;
 			char_ptr = new char[size];
 			if (char_ptr)
