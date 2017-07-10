@@ -92,6 +92,7 @@
 #define TYPE_VEC_ASSIGNMENT 351
 
 #define ARRAY 352
+#define DECL_TYPE  353
 
 
 

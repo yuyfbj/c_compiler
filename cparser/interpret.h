@@ -48,29 +48,43 @@ namespace interpret
 	int evaluate(item_expression* item, ret_item& ret);
 	int evaluate(item_primary_expression* item, ret_item& ret);
 
-	int evaluate(int type, item_struct_declaration_list* item, type_struct_or_union* struct_or_union_p);
-	int evaluate(item_struct_declaration* item, type_struct_or_union* struct_or_union_p);
+	
+	
 	int evaluate(item_struct_declarator* item, type_struct_or_union* struct_or_union_p);
 	int evaluate(item_struct_declarator_list_ex* item, type_struct_or_union* struct_or_union_p);
+	int evaluate(ret_item& ret_type_item, item_struct_declarator_list* item, std::map<std::string, var_t*>& member_set);
 	
-	int evaluate(item_struct_or_union_specifier* item, ret_item& ret);
 	
-	int evaluate(item_type_specifier* item, ret_item& ret);
-	int evaluate(item_specifier_qualifier_list* item, ret_item& ret);
-	int evaluate(item_abstract_declarator* item, ret_item& ret);
+	
 	int evaluate(item_type_name* item, ret_item& ret);
-	int evaluate(item_pointer* item, ret_item& ret);
+	int evaluate(item_pointer* item, var_t* var_p);
 
 	int evaluate(item_parameter_list* item, ret_item& ret);
 	int evaluate(item_parameter_type_list* item, ret_item& ret);
-	int evaluate(item_direct_abstract_declarator* item, ret_item& ret);
-	int evaluate(item_abstract_declarator* item, ret_item& ret);
+	int evaluate(item_direct_abstract_declarator* item, var_t* type_p);
+	
 
-	int evaluate(item_enumerator_list_ex* item, type_enum* enum_p);
-	int evaluate(item_enumerator_list* item, type_enum* enum_p);
+	int evaluate(item_enumerator* item, std::string& name, int& val);
+	int evaluate(item_enumerator_list_ex* item, std::map<std::string, int>& member_set);
+	int evaluate(item_enumerator_list* item, std::map<std::string, int>& member_set);
 	int evaluate(item_enum_specifier* item, type_enum* enum_p);
-	int evaluate(item_enumerator* item, type_enum* enum_p);
 
+	
+	int evaluate(item_abstract_declarator* item, ret_item& ret);
+	int evaluate(item_declarator* item, var_t* var_p);
+	int evaluate(item_direct_declarator* item, var_t* var_p);
+	int evaluate(item_direct_declarator_ex* item, var_t* var_p);
+	
+	int evaluate(item_type_qualifier_list* item, var_t* var_p);
+	int evaluate(item_type_qualifier* item, var_t* var_p);
+	int evaluate(item_type_specifier* item, ret_item& ret);
+
+	
+
+	int evaluate(item_specifier_qualifier_list* item, var_t* var_p);
+	int evaluate(item_struct_declaration* item, std::map<std::string, var_t*>& member_set);
+	int evaluate(item_struct_declaration_list* item, std::map<std::string, var_t*>& member_set);
+	int evaluate(item_struct_or_union_specifier* item, type_struct_or_union* struct_or_union_p);
 	
 
 	

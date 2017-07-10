@@ -2036,11 +2036,15 @@ namespace tree_node
 	: struct_declarator
 	| struct_declarator_list ',' struct_declarator
 	;
-	*/
-	/*
+	¸ÄÎª
 	struct_declarator_list
 	: struct_declarator struct_declarator_list_ex
 	;
+	
+	struct_declarator_list_ex
+	:',' struct_declarator struct_declarator_list_ex
+	;
+	
 	*/
 	struct item_struct_declarator;
 	struct item_struct_declarator_list_ex;

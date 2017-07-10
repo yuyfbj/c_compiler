@@ -30,6 +30,7 @@ namespace symbol
 
 	struct item
 	{
+
 		virtual int get_type() = 0;
 
 
@@ -232,74 +233,83 @@ namespace symbol
 			return *this;
 		}
 		
-		ret_item& operator *=(const ret_item& v1)
+		ret_item& operator *=( ret_item& v1)
 		{
 
 
 			return *this;
 		}
-		ret_item& operator +=(const ret_item& v1)
+		ret_item& operator +=( ret_item& v1)
 		{
 
 
 			return *this;
 		}
-		ret_item& operator -=(const ret_item& v1)
+		ret_item& operator -=( ret_item& v1)
 		{
 
 
 			return *this;
 		}
-		ret_item& operator /=(const ret_item& v1)
+		ret_item& operator /=( ret_item& v1)
 		{
 
 
 			return *this;
 		}
-		ret_item& operator %=(const ret_item& v1)
+		ret_item& operator %=( ret_item& v1)
 		{
 
 
 			return *this;
 		}
-		ret_item& operator <<=(const ret_item& v1)
+		ret_item& operator <<=( ret_item& v1)
 		{
 
 
 			return *this;
 		}
-		ret_item& operator >>=(const ret_item& v1)
-		{
-
-
-			return *this;
-		}
-
-		ret_item& operator &=(const ret_item& v1)
-		{
-
-
-			return *this;
-		}
-		ret_item& operator |=(const ret_item& v1)
-		{
-
-
-			return *this;
-		}
-		ret_item& operator ^=(const ret_item& v1)
+		ret_item& operator >>=( ret_item& v1)
 		{
 
 
 			return *this;
 		}
 
+		ret_item& operator &=( ret_item& v1)
+		{
+
+
+			return *this;
+		}
+		ret_item& operator |=( ret_item& v1)
+		{
+
+
+			return *this;
+		}
+		ret_item& operator ^=( ret_item& v1)
+		{
+
+
+			return *this;
+		}
+
+		ret_item& def_member_bitwidth( ret_item& v1)
+		{
+			//本体是一个变量，设进来是一个整数值。
+			auto int_p = v1.get_item<int>();
+
+
+			return *this;
+		}
 
 
 
 
 
-		ret_item& operator = (const ret_item& v1)
+
+		ret_item& operator = ( ret_item& v1)
 		{
 			this->op = v1.op;
 			this->type = v1.type;
@@ -412,6 +422,8 @@ namespace symbol
 		int size = 0;			//count of item
 		std::string name;
 		std::map<std::string,var_t*> member_set;
+
+	
 		
 	};
 	struct type_array: public item
@@ -427,23 +439,60 @@ namespace symbol
 		char* mem_ptr = NULL;   //mem 
 	};
 	
+
+
 	//变量
 	struct var_t:public item
 	{
 		int type = IDENTIFIER;
+		
 		virtual int get_type()
 		{
 			return type;
 		}
 
+		var_t& operator = (const var_t& v1)
+		{
+
+			return *this;
+		}
+
+		std::string var_name;
 		int var_type = 0;
-		bool is_signed = false;
+		int bit_widht = sizeof(int);
+
+		int start_count = 0;
+		
+
+		/*type_qualifier
+			: CONST
+			| VOLATILE
+			; */
+		bool is_const = false;
+		bool is_volatile = false;
+
+		/*storage_class_specifier
+			: TYPEDEF
+			| EXTERN
+			| STATIC
+			| AUTO
+			| REGISTER
+			;*/
+		bool is_auto = false;
+		bool is_register = false;
+		bool is_static = false;
+		bool is_extern = false;
+		bool is_typedef = false;
 
 		var_t()
 		{
 
 		}
 		var_t(int type)
+		{
+			new_mem(type);
+		}
+		void new_mem(int type)
 		{
 			this->var_type = type;
 			if (VOID == type)
@@ -518,6 +567,8 @@ namespace symbol
 			| struct_or_union_specifier
 			| enum_specifier
 			| TYPE_NAME*/
+
+		bool is_signed = false;
 		union
 		{
 			void*	void_ptr = NULL;
