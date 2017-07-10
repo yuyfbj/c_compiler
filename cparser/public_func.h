@@ -21,6 +21,37 @@ namespace pub_func
 		return NULL;
 	}
 
+
+	template<class T>
+	T* new_item_z()
+	{
+		auto item = new T;
+		if (NULL == item)
+			return NULL;
+		memset(item, 0, sizeof(T));
+
+		return item;
+	}
+
+	template<class T>
+	T* new_item(int type)
+	{
+		auto item = new T;
+		if (NULL == item)
+			return NULL;
+		
+
+		return item;
+	}
+
+	template <class T>
+	T* release_item(T* p)
+	{
+		//error_report();
+		delete p;
+		return NULL;
+	}
+
 }
 
 

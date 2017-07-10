@@ -143,8 +143,6 @@ namespace interpret
 			return evaluate(ret_mul_item, item->right2, ret);
 		}
 
-
-
 		return 0;
 	}
 
@@ -669,11 +667,51 @@ namespace interpret
 
 		return item->op;
 	}
+
+	int evaluate(item_argument_expression_list_ex* item, ret_item& ret)
+	{
+		/*
+		argument_expression_list_ex
+		: ',' assignment_expression argument_expression_list_ex
+		|EMPTY
+		;
+		*/
+		ret_item ret_aelex_item;
+		int ret_val = evaluate(item->right1, ret_aelex_item);
+
+		if (item->right2)
+		{
+			return evaluate(item->right2, ret);
+		}
+		ret = ret_aelex_item;
+
+		return ret_val;
+	}
+	
 	int evaluate(item_argument_expression_list* item, ret_item& ret)
 	{
-
-
-
+		/*argument_expression_list
+		: assignment_expression
+		| argument_expression_list ',' assignment_expression
+		;
+		argument_expression_list
+		: assignment_expression argument_expression_list_ex
+		;
+		argument_expression_list_ex
+		: ',' assignment_expression argument_expression_list_ex
+		|EMPTY
+		;
+		*/
+		if (item->right1 && item->right2 == NULL)
+		{
+			return evaluate(item->right1, ret);
+		}
+		else if (item->right1 && item->right2)
+		{
+			ret_item ret_aelex_item;
+			evaluate(item->right1, ret_aelex_item);
+			return evaluate( item->right2, ret);
+		}
 
 		return 0;
 	}
@@ -768,6 +806,13 @@ namespace interpret
 
 		return 0;
 	}
+	int evaluate(item_constant_expression* item, ret_item& ret)
+	{
+		/*constant_expression
+		: conditional_expression
+		;*/
+		return evaluate(item->right1, ret);
+	}
 
 	int evaluate(item_postfix_expression* item, ret_item& ret)
 	{
@@ -835,34 +880,347 @@ namespace interpret
 
 		return 0;
 	}
-	int evaluate(item_type_specifier* item, ret_item& ret)
+
+	int evaluate(item_struct_declarator* item, type_struct_or_union* struct_or_union_p)
+	{	
+		/*
+		struct_declarator
+		: declarator
+		| ':' constant_expression
+		| declarator ':' constant_expression
+		;
+		*/
+		//=============================================
+
+
+
+		return  0;
+	}
+	int evaluate(item_struct_declarator_list_ex* item, type_struct_or_union* struct_or_union_p)
 	{
+		/*
+		struct_declarator_list_ex
+		:',' struct_declarator struct_declarator_list_ex
+		;
+		*/
+		//=============================================
 
 
 
 		return 0;
 	}
+	int evaluate(item_struct_declarator_list* item, type_struct_or_union* struct_or_union_p)
+	{
+		/*
+		struct_declarator_list
+		: struct_declarator
+		| struct_declarator_list ',' struct_declarator
+		;
+		struct_declarator_list
+		: struct_declarator struct_declarator_list_ex
+		;
+		*/
+		if (item->right1 && item->right2 == NULL)
+		{
+			return evaluate(item->right1, struct_or_union_p);
+		}
+		else if (item->right1 && item->right2)
+		{
+			evaluate(item->right1, struct_or_union_p);
+			return evaluate(item->right2, struct_or_union_p);
+		}
+		return 0;
+	}
+	int evaluate(item_struct_declaration* item, type_struct_or_union* struct_or_union_p)
+	{
+		/*struct_declaration
+		: specifier_qualifier_list struct_declarator_list ';'
+		;
+		*/
+		//===============================================
+
+
+
+
+
+		return 0;
+	}
+	
+	int evaluate(int type,item_struct_declaration_list* item, type_struct_or_union* struct_or_union_p)
+	{
+		/*struct_declaration_list
+		: struct_declaration
+		| struct_declaration_list struct_declaration
+		;
+		©ирт
+		struct_declaration_list
+		: struct_declaration
+		| struct_declaration  struct_declaration_list
+		;
+		*/
+		if (!struct_or_union_p)
+			return 0;
+		struct_or_union_p->type = type;
+		
+		if (item->right1 && item->right2 == NULL)
+		{
+			return evaluate(item->right1, struct_or_union_p);
+		}
+		else if (item->right1 && item->right2)
+		{
+			evaluate(item->right1, struct_or_union_p);
+			return evaluate(type,item->right2, struct_or_union_p);
+		}
+		return 0;
+	}
+	int evaluate(item_struct_or_union_specifier* item, type_struct_or_union* struct_or_union_p)
+	{
+		/*
+		struct_or_union_specifier
+		: struct_or_union IDENTIFIER '{' struct_declaration_list '}'
+		| struct_or_union '{' struct_declaration_list '}'
+		| struct_or_union IDENTIFIER
+		;
+		*/
+		if (!struct_or_union_p)
+			return  0;
+		if (item->right2)
+		{
+			struct_or_union_p->name = item->right2->right;
+		}
+		if (item->right3)
+		{
+			return evaluate(item->right1->op,item->right3, struct_or_union_p);
+		}
+		return 0;
+	}
+	int evaluate(item_enumerator* item, type_enum* enum_p)
+	{
+		/*
+		enumerator
+		: IDENTIFIER
+		| IDENTIFIER '=' constant_expression
+		;*/
+		if (!enum_p)
+			return 0;
+		if (item->right1&& item->right2 == NULL)
+		{
+			std::string id = item->right1->right;
+			int val = 0;
+			enum_p->member_set[id] = val;
+			return item->op;
+		}
+		else if (item->right1 && item->right2)
+		{
+			std::string id = item->right1->right;
+			int val = 0;
+			ret_item ret_ce_item;
+			evaluate(item->right2, ret_ce_item);
+			auto int_p = ret_ce_item.get_item<int>();
+			if (int_p)
+			{
+				val = *int_p;
+			}
+			enum_p->member_set[id] = val;
+			return item->op;
+		}
+		return 0;
+	}
+
+	int evaluate(item_enumerator_list_ex* item, type_enum* enum_p)
+	{
+		/*enumerator_list_ex
+		: ',' enumerator  enumerator_list_ex
+		|empty
+		;*/
+		if (!enum_p)
+			return 0;
+		if (item->right1 && item->right2 == NULL)
+		{
+			return evaluate(item->right1, enum_p);
+		}
+		else if (item->right1 && item->right2)
+		{
+			evaluate(item->right1, enum_p);
+			return evaluate(item->right2, enum_p);
+		}
+		return 0;
+	}
+	int evaluate(item_enumerator_list* item, type_enum* enum_p)
+	{
+		/*
+		enumerator_list
+		: enumerator  enumerator_list_ex
+		;
+		*/
+		if (!enum_p)
+			return 0;
+		if (item->right1 && item->right2 == NULL)
+		{
+			return evaluate(item->right1, enum_p);
+		}
+		else if (item->right1 && item->right2)
+		{
+			evaluate(item->right1, enum_p);
+			return evaluate(item->right2, enum_p);
+		}
+
+		return 0;
+	}
+	int evaluate(item_enum_specifier* item, type_enum* enum_p)
+	{
+		/*
+		enum_specifier
+		: ENUM '{' enumerator_list '}'
+		| ENUM IDENTIFIER '{' enumerator_list '}'
+		| ENUM IDENTIFIER
+		;
+		*/
+		if (!enum_p)
+			return 0;
+		if (item->right2)
+		{
+			enum_p->name = item->right2->right;
+		}
+		if (item->right1)
+		{
+			return evaluate(item->right1, enum_p);
+		}
+		return item->op;
+	}
+	int evaluate(item_type_specifier* item, ret_item& ret)
+	{
+		/*
+		type_specifier
+		: VOID
+		| CHAR
+		| SHORT
+		| INT
+		| LONG
+		| FLOAT
+		| DOUBLE
+		| SIGNED
+		| UNSIGNED
+		| struct_or_union_specifier
+		| enum_specifier
+		| TYPE_NAME
+		;
+		*/
+		if (
+			VOID == item->op
+			|| CHAR == item->op
+			|| SHORT == item->op
+			|| INT == item->op
+			|| LONG == item->op
+			|| FLOAT == item->op
+			|| DOUBLE == item->op
+			|| SIGNED == item->op
+			|| UNSIGNED == item->op
+			|| TYPE_NAME == item->op
+			)
+		{
+			auto var_p = new_item<var_t>(item->op);
+			if (var_p)
+			{
+				ret.set_item<var_t>(var_p);
+				return item->op;
+			}
+		}
+		else if (item->right1)
+		{//struct_or_union_specifier
+			if (item->right1->op == STRUCT )
+			{
+				auto var_p = new_item<var_t>(STRUCT);
+				if (var_p)
+				{
+					ret.set_item<var_t>(var_p);
+					return evaluate(item->right1, var_p->struct_or_union_ptr);
+				}
+			}
+			else if (item->right1->op == UNION)
+			{
+				auto var_p = new_item<var_t>(UNION);
+				if (var_p)
+				{
+					ret.set_item<var_t>(var_p);
+					return evaluate(item->right1, var_p->struct_or_union_ptr);
+				}
+			}
+		}
+		else if (item->right2)
+		{//enum_specifier
+			auto var_p = new_item<var_t>(ENUM);
+			if (var_p)
+			{
+				ret.set_item<var_t>(var_p);
+				return evaluate(item->right2, var_p->enum_ptr);
+			}
+		}
+		return 0;
+	}
+	int evaluate(item_type_qualifier* item, ret_item& ret)
+	{
+		/*type_qualifier
+		: CONST
+		| VOLATILE
+		;*/
+		//===============================================
+
+		return 0;
+	}
 	int evaluate(item_specifier_qualifier_list* item, ret_item& ret)
 	{
+		/*
+		specifier_qualifier_list
+		: type_specifier specifier_qualifier_list
+		| type_specifier
+		| type_qualifier specifier_qualifier_list
+		| type_qualifier
+		;
+		*/
+		auto var_p = ret.get_item<var_t>();
+		if (!var_p)
+			return 0;
+
+		if (item->right1 )
+		{
+			if (item->right3 == NULL)
+			{
+				return evaluate(item->right1, ret);
+			}
+			else
+			{
+				ret_item ret_ts_item;
+				evaluate(item->right1, ret_ts_item);
+			}
+		}
+		else if (item->right2)
+		{
 
 
+
+		}
 		return 0;
 	}
 
 
 	int evaluate(item_pointer* item, ret_item& ret)
 	{
-
-		return 0;
-	}
-	int evaluate(item_constant_expression* item, ret_item& ret)
-	{
+		/*pointer
+		: '*'
+		| '*' type_qualifier_list
+		| '*' pointer
+		| '*' type_qualifier_list pointer
+		;*/
 
 		return 0;
 	}
 
 	int evaluate(item_parameter_list* item, ret_item& ret)
 	{
+		/*parameter_list
+		: parameter_declaration parameter_list_ex
+		;*/
 
 
 		return 0;
@@ -953,10 +1311,6 @@ namespace interpret
 			return fn(ret_pt, ret_dad_item,ret);
 
 		}
-
-
-
-
 		return 0;
 	}
 	int evaluate(item_type_name* item, ret_item& ret)
@@ -976,13 +1330,8 @@ namespace interpret
 			evaluate(item->right2, ret_sql_item);
 			ret_item ret_ad_item;
 			evaluate(item->right3, ret_ad_item);
-
-			auto fn = [](ret_item& v1, ret_item& v2, ret_item& ret)->int
-			{//=================================
-
-				return 0;
-			};
-			return fn(ret_sql_item,ret_ad_item,ret);
+			//========================================
+			
 		}
 
 		return 0;

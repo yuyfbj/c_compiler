@@ -91,6 +91,8 @@
 #define ASSIGNMENT_OP  350
 #define TYPE_VEC_ASSIGNMENT 351
 
+#define ARRAY 352
+
 
 
 

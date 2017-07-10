@@ -3,8 +3,10 @@
 #include <map>
 #include <string>
 #include "token_def.h"
+#include "public_func.h"
 namespace symbol
 {
+	using namespace pub_func;
 	/*
 	语义的几个问题，需要搞清楚：
 	1.语义动作或值的传递：
@@ -186,8 +188,7 @@ namespace symbol
 			return NULL;
 		}
 
-
-
+		
 		ret_item* star_op()
 		{
 
@@ -389,8 +390,43 @@ namespace symbol
 		}
 	};
 	
-
-
+	struct var_t;
+	struct type_enum :public item
+	{
+		virtual int get_type()
+		{
+			return type;
+		}
+		int type = ENUM;
+		int size = 0;
+		std::string name;
+		std::map<std::string, int> member_set;
+	};
+	struct type_struct_or_union : public item
+	{
+		virtual int get_type()
+		{
+			return type;
+		}
+		int type = STRUCT;//UNION
+		int size = 0;			//count of item
+		std::string name;
+		std::map<std::string,var_t*> member_set;
+		
+	};
+	struct type_array: public item
+	{
+		virtual int get_type()
+		{
+			return type;
+		}
+		int type = ARRAY;        
+		int size = 0;			//count of item
+		int item_type = 0;		//type of item
+		int item_size = 0;      //size of item
+		char* mem_ptr = NULL;   //mem 
+	};
+	
 	//变量
 	struct var_t:public item
 	{
@@ -400,30 +436,88 @@ namespace symbol
 			return type;
 		}
 
-		enum vt{
-			vt_void_ptr = 100
-			,vt_char
-			,vt_short
-			,vt_int
-			,vt_long
-			,vt_float
-			,vt_double
-			,vt_struct
-			,vt_enum
-			,vt_array
-		};
-		enum rt
-		{
-			rt_address = 100
-			,rt_value
-		};
-		int ref_type = 0;
 		int var_type = 0;
-		int size = 0;
-		int array_item_size = 0;
-		int array_item_type = 0;
-		std::string name;
+		bool is_signed = false;
+
+		var_t()
+		{
+
+		}
+		var_t(int type)
+		{
+			this->var_type = type;
+			if (VOID == type)
+			{//====================
+				
+			}
+			else if (CHAR == type)
+			{
+				char_ptr = new_item_z<char>();
+			}
+			else if (SHORT == type)
+			{
+				short_ptr = new_item_z<short>();
+			}
+			else if (INT == type)
+			{
+				int_ptr = new_item_z<int>();
+			}
+			else if (LONG == type)
+			{
+				long_ptr = new_item_z<long>();
+			}
+			else if (FLOAT == type)
+			{
+				float_ptr = new_item_z<float>();
+			}
+			else if (DOUBLE == type)
+			{
+				double_ptr = new_item_z<double>();
+			}
 		
+			else if (STRUCT == type)
+			{
+				struct_or_union_ptr = new_item_z<type_struct_or_union>();
+				if (struct_or_union_ptr)
+					struct_or_union_ptr->type = type;
+			}
+			else if (UNION == type)
+			{
+				struct_or_union_ptr = new_item_z<type_struct_or_union>();
+				if (struct_or_union_ptr)
+					struct_or_union_ptr->type = type;
+			}
+			else if (ENUM == type)
+			{
+				enum_ptr = new_item_z<type_enum>();
+			}
+			else if (ARRAY == type)
+			{
+				array_ptr = new_item_z<type_array>();
+			}
+
+			else if (SIGNED == type)
+			{
+				is_signed = true;
+			}
+			else if (UNSIGNED == type)
+			{
+				is_signed = false;
+			}
+		}
+		
+		/*: VOID
+			| CHAR
+			| SHORT
+			| INT
+			| LONG
+			| FLOAT
+			| DOUBLE
+			| SIGNED
+			| UNSIGNED
+			| struct_or_union_specifier
+			| enum_specifier
+			| TYPE_NAME*/
 		union
 		{
 			void*	void_ptr = NULL;
@@ -433,57 +527,42 @@ namespace symbol
 			long*	long_ptr;
 			float*  float_ptr;
 			double* double_ptr;
-			void*   struct_ptr;
-			void*   enum_ptr;
-			void*   array_ptr;
+			type_struct_or_union* struct_or_union_ptr;
+			type_enum*   enum_ptr;
+			type_array*  array_ptr;
+			
 		};
-		//各种运算符操作
-
-	
-
-
-
 	};
 
 	//常量
 
 	struct const_t :public var_t
 	{
+		
 		const_t(float fval,const char* val)
 		{
-			name = val;
-
 			type = CONST;
-			var_type = vt_float;
-			size = sizeof(float);
+			var_type = FLOAT;
 			float_ptr = new float(fval);
-			
 		}
 		const_t(int ival,const char* val)
 		{
-			name = val;
-		
 			type = CONST;
-			var_type = vt_int;
-			size = sizeof(int);
+			var_type = INT;
 			int_ptr = new int(ival);
-			
 		}
 
 		const_t(const char* pstr)
 		{
-			name = pstr;
 			type = CONST;
-			var_type = vt_char;
-			size = strlen(pstr) + 1;
+			var_type = CHAR;
+			int size = strlen(pstr) + 1;
 			char_ptr = new char[size];
 			if (char_ptr)
 			{
 				strcpy(char_ptr, pstr);
 			}
 		}
-
-		
 	};
 
 
