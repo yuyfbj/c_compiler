@@ -422,10 +422,38 @@ namespace symbol
 		int size = 0;			//count of item
 		std::string name;
 		std::map<std::string,var_t*> member_set;
-
-	
 		
 	};
+
+	struct type_function : public item
+	{
+		virtual int get_type()
+		{
+			return type;
+		}
+		bool is_ellipsis = false;
+		int type = FUNCTION;
+		int size = 0;			//count of item
+		std::string name;
+		std::map<std::string, var_t*> member_set;
+
+		void set_id_list(std::vector<std::string>& id_list)
+		{
+
+
+
+			return;
+		}
+		void call_func()
+		{
+			//===================================
+
+
+			return;
+		}
+
+	};
+
 	struct type_array: public item
 	{
 		virtual int get_type()
@@ -438,6 +466,8 @@ namespace symbol
 		int item_size = 0;      //size of item
 		char* mem_ptr = NULL;   //mem 
 	};
+
+
 	
 
 
@@ -581,6 +611,7 @@ namespace symbol
 			type_struct_or_union* struct_or_union_ptr;
 			type_enum*   enum_ptr;
 			type_array*  array_ptr;
+			type_function* func_ptr;
 			
 		};
 	};

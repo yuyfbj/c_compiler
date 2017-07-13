@@ -881,6 +881,159 @@ namespace interpret
 		return 0;
 	}
 
+	int evaluate(item_declaration_specifiers* item, ret_item& ret_type_item)
+	{
+
+
+		return 0;
+	}
+	int evaluate(item_parameter_declaration* item, std::map<std::string, var_t*> member_set)
+	{
+		//parameter_declaration
+		//	: declaration_specifiers declarator
+		//	| declaration_specifiers abstract_declarator
+		//	| declaration_specifiers
+		//	;
+		
+		if (item->right1 && item->right2 == NULL && item->right3 == NULL)
+		{
+			ret_item ret_type_item;
+			int nret = evaluate(item->right1, ret_type_item);
+			auto var_p = ret_type_item.get_item<var_t>();
+			if (var_p)
+			{
+				std::ostringstream oo;
+				oo << "var" << var_p;
+				member_set[oo.str()] = var_p;
+				return nret;
+			}
+		}
+
+		if (item->right1 && item->right2)
+		{
+			ret_item ret_type_item;
+			int nret = evaluate(item->right1, ret_type_item);
+			auto var_p = ret_type_item.get_item<var_t>();
+			if (var_p)
+			{
+				return evaluate(item->right2, var_p);
+			}
+			
+		}
+		else if (item->right1 && item->right3)
+		{
+			ret_item ret_type_item;
+			int nret = evaluate(item->right1, ret_type_item);
+			ret_item ret_temp_item;
+			return evaluate(ret_type_item, item->right3, ret_temp_item);
+		}
+		return 0;
+	}
+	int evaluate(item_parameter_list_ex* item, std::map<std::string, var_t*> member_set)
+	{
+		/*
+		parameter_list_ex
+		: ',' parameter_declaration parameter_list_ex
+		|empty
+		;
+		*/
+		if (item->right1 && item->right2 == NULL)
+		{
+			return evaluate(item->right1, member_set);
+		}
+		else if (item->right1 && item->right2)
+		{
+			evaluate(item->right1, member_set);
+			return evaluate(item->right2, member_set);
+		}
+
+		return 0;
+	}
+	
+	int evaluate(item_parameter_list* item, std::map<std::string, var_t*> member_set)
+	{
+		/*parameter_list
+		: parameter_declaration parameter_list_ex
+		;*/
+		if (item->right1 && item->right2 == NULL)
+		{
+			return evaluate(item->right1, member_set);
+		}
+		else if (item->right1 && item->right2)
+		{
+			evaluate(item->right1, member_set);
+			return evaluate(item->right2, member_set);
+		}
+
+		return 0;
+	}
+	int evaluate(item_parameter_type_list* item, type_function* func_p)
+	{
+		/*
+		parameter_type_list
+		: parameter_list
+		| parameter_list ',' ELLIPSIS           //省略号
+		;
+		*/
+		if (!func_p)
+			return 0;
+		if (item->right1 && item->right2 == NULL)
+		{
+			return evaluate(item->right1, func_p->member_set);
+		}
+		else if (item->right1 && item->right2)
+		{
+			func_p->is_ellipsis = true;
+			return evaluate(item->right1, func_p->member_set);
+		}
+		return 0;
+	}
+
+	int evaluate(item_identifier_list_ex* item, std::vector<std::string>& id_list)
+	{
+		/*
+		identifier_list_ex
+		: ',' IDENTIFIER identifier_list_ex
+		*/
+		if (item->right1 && item->right2 == NULL)
+		{
+			id_list.push_back(item->right1->right);
+			return id_list.size();
+		}
+		else if (item->right1 && item->right2)
+		{
+			id_list.push_back(item->right1->right);
+			return evaluate(item->right2, id_list);
+		}
+		return 0;
+	}
+	int evaluate(item_identifier_list* item, std::vector<std::string>& id_list)
+	{
+		/*
+		identifier_list
+		: IDENTIFIER
+		| identifier_list ',' IDENTIFIER
+		;
+		*/
+	
+		/*改为
+		identifier_list
+		: IDENTIFIER identifier_list_ex
+		*/
+		
+		if (item->right1 && item->right2 == NULL)
+		{
+			id_list.push_back(item->right1->right);
+			return id_list.size();
+		}
+		else if (item->right1 && item->right2)
+		{
+			id_list.push_back(item->right1->right);
+			return evaluate(item->right2, id_list);
+		}
+		return 0;
+	}
+
 	int evaluate(item_direct_declarator_ex* item,var_t* var_p)
 	{
 		/*
@@ -892,7 +1045,7 @@ namespace interpret
 			| '(' ')' direct_declarator_ex
 			;
 		*/
-		//=========================================================
+		
 		if (item->op == '[')
 		{
 			if (item->right1 && item->right4 == NULL)
@@ -908,51 +1061,138 @@ namespace interpret
 						array_p->size = *int_p;
 						var_p->array_ptr = array_p;
 						var_p->var_type = ARRAY;
+
+						return item->op;
 					}
 				}
 			}
 			else if (item->right1 && item->right4)
 			{//'[' constant_expression ']' direct_declarator_ex
 
+				ret_item ret_ce_item;
+				evaluate(item->right1, ret_ce_item);
+				auto int_p = ret_ce_item.get_item<int>();
+				if (int_p)
+				{
+					auto array_p = new type_array;
+					if (array_p)
+					{
+						array_p->size = *int_p;
+						var_p->array_ptr = array_p;
+						var_p->var_type = ARRAY;
+					}
+				}
+				return evaluate(item->right4, var_p);
+
 			}
 			else if (item->right1 == NULL && item->right4)
 			{//'[' ']' direct_declarator_ex
-
+				auto array_p = new type_array;
+				if (array_p)
+				{	
+					var_p->array_ptr = array_p;
+					var_p->var_type = ARRAY;
+				}
+				return evaluate(item->right4, var_p);
 			}
 			else if (item->right1 == NULL && item->right4 == NULL)
 			{	//'[' ']'
-
+				auto array_p = new type_array;
+				if (array_p)
+				{
+					var_p->array_ptr = array_p;
+					var_p->var_type = ARRAY;
+				}
+				return item->op;
 			}
 		}
 		else if (item->op == '(')
 		{
 			if (item->right2 && item->right4 == NULL)
-			{	//'(' parameter_type_list ')' 
-
+			{	
+				//函数声明
+				//'(' parameter_type_list ')' 
+				auto func_p = new type_function;
+				if (func_p)
+				{
+					var_p->var_type = FUNCTION;
+					var_p->func_ptr = func_p;
+					return evaluate(item->right2, func_p);
+				}
 			}
 			else if (item->right2 && item->right4)
-			{//'(' parameter_type_list ')' direct_declarator_ex
+			{
+				//函数声明
+				//'(' parameter_type_list ')' direct_declarator_ex
+				auto func_p = new type_function;
+				if (func_p)
+				{
+					var_p->var_type = FUNCTION;
+					var_p->func_ptr = func_p;
+					evaluate(item->right2, func_p);
+					int nret = evaluate(item->right4, var_p);
+					insert_var(func_p->name, var_p);
 
-
+					return nret;
+				}
 			}
 			else if (item->right3 && item->right4 == NULL)
-			{//| '(' identifier_list ')'
+			{	//这个是调用函数了。
+				//| '(' identifier_list ')'  
+				auto func_p = new type_function;
+				if (func_p)
+				{
+					var_p->var_type = CALL_FUNCTION;
+					var_p->func_ptr = func_p;
+					std::vector<std::string> id_list;
+					int nret = evaluate(item->right3, id_list);
+					func_p->set_id_list(id_list);
+					func_p->call_func();
 
+					return nret;
+				}
 			}
 			else if (item->right3 && item->right4)
 			{//| '(' identifier_list ')' direct_declarator_ex
+				auto func_p = new type_function;
+				if (func_p)
+				{
+					var_p->var_type = CALL_FUNCTION;
+					var_p->func_ptr = func_p;
+					std::vector<std::string> id_list;
+					int nret = evaluate(item->right3, id_list);
+					func_p->set_id_list(id_list);
+					func_p->call_func();
 
+					return evaluate(item->right4, var_p);
+
+				}
 			}
 			else if (item->right3 == NULL && item->right4)
 			{//'(' ')' direct_declarator_ex
+				auto func_p = new type_function;
+				if (func_p)
+				{
+					var_p->var_type = CALL_FUNCTION;
+					var_p->func_ptr = func_p;
+					
+					func_p->call_func();
 
+					return evaluate(item->right4, var_p);
+				}
 			}
 			else if (item->right3 == NULL && item->right4 == NULL)
 			{	//'(' ')'
+				auto func_p = new type_function;
+				if (func_p)
+				{
+					var_p->var_type = CALL_FUNCTION;
+					var_p->func_ptr = func_p;
 
+					func_p->call_func();
+					return item->op;
+				}
 			}
-
-
 		}
 		
 		return 0;
@@ -1492,30 +1732,7 @@ namespace interpret
 	}
 
 
-	int evaluate(item_parameter_list* item, ret_item& ret)
-	{
-		/*parameter_list
-		: parameter_declaration parameter_list_ex
-		;*/
-		//=======================================
-
-		return 0;
-	}
-	int evaluate(item_parameter_type_list* item, ret_item& ret)
-	{
-		/*
-		parameter_type_list
-		: parameter_list
-		| parameter_list ',' ELLIPSIS           //省略号
-		;
-		*/
-		//=======================================
-		
-
-
-
-		return 0;
-	}
+	
 	int evaluate(item_direct_abstract_declarator* item, var_t* type_p)
 	{
 		/*
@@ -1529,10 +1746,19 @@ namespace interpret
 		*/
 		//=======================================
 		if (item->op == '(')
-		{
+		{//声明函数
 			if (item->right1)
 			{//'(' abstract_declarator ')' direct_abstract_declarator_ex
-					
+				auto func_p = new type_function;
+				if (func_p)
+				{
+					func_p->type = FUNCTION;
+					type_p->var_type = FUNCTION;
+					type_p->func_ptr = func_p;
+					ret_item ret_decl_item;
+					evaluate(type_p, item->right1, ret_decl_item);
+
+				}
 			}
 			else if (item->right2)
 			{//'(' parameter_type_list ')' direct_abstract_declarator_ex
@@ -1544,7 +1770,7 @@ namespace interpret
 			}
 		}
 		else if (item->op == '[')
-		{
+		{//声明数组。
 			if (item->right3)
 			{//'[' constant_expression ']' direct_abstract_declarator_ex
 

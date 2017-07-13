@@ -59,8 +59,13 @@ namespace interpret
 	int evaluate(item_type_name* item, ret_item& ret);
 	int evaluate(item_pointer* item, var_t* var_p);
 
-	int evaluate(item_parameter_list* item, ret_item& ret);
-	int evaluate(item_parameter_type_list* item, ret_item& ret);
+	int evaluate(item_identifier_list_ex* item, std::vector<std::string>& id_list);
+	int evaluate(item_identifier_list* item, std::vector<std::string>& id_list);
+
+	
+	int evaluate(item_parameter_list* item, std::map<std::string, var_t*> member_set);
+	int evaluate(item_parameter_type_list* item, type_function* func_p);
+
 	int evaluate(item_direct_abstract_declarator* item, var_t* type_p);
 	
 
@@ -86,6 +91,9 @@ namespace interpret
 	int evaluate(item_struct_declaration_list* item, std::map<std::string, var_t*>& member_set);
 	int evaluate(item_struct_or_union_specifier* item, type_struct_or_union* struct_or_union_p);
 	
+	int evaluate(item_declaration_specifiers* item, ret_item& ret_type_item);
+	int evaluate(item_parameter_declaration* item, std::map<std::string, var_t*> member_set);
+	int evaluate(item_parameter_list_ex* item, std::map<std::string, var_t*> member_set);
 
 	
 

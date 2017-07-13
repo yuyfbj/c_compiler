@@ -94,6 +94,9 @@
 #define ARRAY 352
 #define DECL_TYPE  353
 
+#define FUNCTION 354
+#define CALL_FUNCTION 355
+
 
 
 
